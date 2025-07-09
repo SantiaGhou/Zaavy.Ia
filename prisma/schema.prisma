@@ -1,0 +1,71 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  openaiKey String?
+  createdAt DateTime @default(now())
+  
+  bots Bot[]
+  
+  @@map("users")
+}
+
+model Bot {
+  id           String   @id @default(cuid())
+  userId       String
+  name         String
+  prompt       String
+  status       String   @default("offline") // online, offline, connecting
+  sessionId    String?  @unique
+  isConnected  Boolean  @default(false)
+  messagesCount Int     @default(0)
+  createdAt    DateTime @default(now())
+  lastActivity DateTime @default(now())
+  
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages Message[]
+  sessions Session[]
+  
+  @@map("bots")
+}
+
+model Message {
+  id          String   @id @default(cuid())
+  botId       String
+  content     String
+  sender      String   // user, bot
+  phoneNumber String?
+  userName    String?
+  timestamp   DateTime @default(now())
+  
+  bot Bot @relation(fields: [botId], references: [id], onDelete: Cascade)
+  
+  @@map("messages")
+}
+
+model Session {
+  id          String    @id @default(cuid())
+  botId       String
+  qrCode      String?
+  isActive    Boolean   @default(false)
+  connectedAt DateTime?
+  lastMessage DateTime?
+  createdAt   DateTime  @default(now())
+  
+  bot Bot @relation(fields: [botId], references: [id], onDelete: Cascade)
+  
+  @@map("sessions")
+}
