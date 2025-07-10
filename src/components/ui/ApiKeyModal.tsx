@@ -42,7 +42,7 @@ export function ApiKeyModal() {
       setTimeout(() => {
         handleClose();
       }, 1500);
-    } catch (error) {
+    } catch (error: any) {
       setError(error.message || 'Erro ao salvar chave da OpenAI');
     } finally {
       setLoading(false);

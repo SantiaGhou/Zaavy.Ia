@@ -10,34 +10,34 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
+model Session {
   id        String   @id @default(cuid())
-  name      String
-  email     String   @unique
-  password  String
+  sessionId String   @unique
   openaiKey String?
   createdAt DateTime @default(now())
   
   bots Bot[]
   
-  @@map("users")
+  @@map("sessions")
 }
 
 model Bot {
   id           String   @id @default(cuid())
-  userId       String
+  sessionId    String
   name         String
-  prompt       String
+  prompt       String?
+  type         String   @default("ai") // ai, rules, hybrid
+  flowData     String?  // JSON string for flow configuration
   status       String   @default("offline") // online, offline, connecting
-  sessionId    String?  @unique
+  whatsappSessionId String? @unique
   isConnected  Boolean  @default(false)
   messagesCount Int     @default(0)
   createdAt    DateTime @default(now())
   lastActivity DateTime @default(now())
   
-  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  session  Session   @relation(fields: [sessionId], references: [sessionId], onDelete: Cascade)
   messages Message[]
-  sessions Session[]
+  whatsappSessions WhatsappSession[]
   
   @@map("bots")
 }
@@ -56,7 +56,7 @@ model Message {
   @@map("messages")
 }
 
-model Session {
+model WhatsappSession {
   id          String    @id @default(cuid())
   botId       String
   qrCode      String?
@@ -67,5 +67,5 @@ model Session {
   
   bot Bot @relation(fields: [botId], references: [id], onDelete: Cascade)
   
-  @@map("sessions")
+  @@map("whatsapp_sessions")
 }

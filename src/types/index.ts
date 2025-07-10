@@ -1,13 +1,48 @@
 export interface Bot {
   id: string;
   name: string;
-  prompt: string;
+  prompt?: string;
+  type: 'ai' | 'rules' | 'hybrid';
+  flowData?: FlowData;
   status: 'online' | 'offline' | 'connecting';
   messagesCount: number;
   createdAt: Date;
   lastActivity?: Date;
   sessionId?: string;
   isConnected: boolean;
+}
+
+export interface FlowData {
+  nodes: FlowNode[];
+  connections: FlowConnection[];
+}
+
+export interface FlowNode {
+  id: string;
+  type: 'trigger' | 'message' | 'condition' | 'ai' | 'action';
+  position: { x: number; y: number };
+  data: {
+    label?: string;
+    message?: string;
+    conditions?: Condition[];
+    aiPrompt?: string;
+    responses?: string[];
+  };
+}
+
+export interface FlowConnection {
+  id: string;
+  source: string;
+  target: string;
+  label?: string;
+}
+
+export interface Condition {
+  id: string;
+  type: 'contains' | 'equals' | 'starts_with' | 'ends_with';
+  value: string;
+  response: string;
+  nextNode?: string;
 }
 
 export interface Message {

@@ -1,5 +1,5 @@
-import React from 'react';
-import { Plus, Bot, MessageCircle, Activity, Settings, LogOut, Key, Zap, Users, Clock } from 'lucide-react';
+import React, { useEffect } from 'react';
+import { Plus, Bot, MessageCircle, Activity, Settings, Key, Zap, Users, Clock, ArrowLeft } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
 import { Badge } from '../ui/Badge';
@@ -11,13 +11,21 @@ import { apiService } from '../../services/api';
 export function Dashboard() {
   const { state, dispatch } = useApp();
 
-  const handleLogout = () => {
-    apiService.logout();
-    dispatch({ type: 'SET_USER', payload: null });
-    dispatch({ type: 'SET_TOKEN', payload: null });
-    dispatch({ type: 'SET_AUTHENTICATED', payload: false });
-    dispatch({ type: 'SET_CURRENT_PAGE', payload: 'landing' });
-  };
+  // Load bots on dashboard mount
+  useEffect(() => {
+    const loadBots = async () => {
+      try {
+        const bots = await apiService.getBots();
+        dispatch({ type: 'SET_BOTS', payload: bots });
+      } catch (error) {
+        console.error('Error loading bots:', error);
+      }
+    };
+
+    if (state.isAuthenticated) {
+      loadBots();
+    }
+  }, [state.isAuthenticated, dispatch]);
 
   const totalMessages = state.bots.reduce((sum, bot) => sum + bot.messagesCount, 0);
   const activeBots = state.bots.filter(bot => bot.status === 'online').length;
@@ -30,7 +38,16 @@ export function Dashboard() {
       <header className="border-b border-gray-900/50 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
-            <Logo size="md" />
+            <div className="flex items-center space-x-4">
+              <Button
+                variant="ghost"
+                onClick={() => dispatch({ type: 'SET_CURRENT_PAGE', payload: 'landing' })}
+                icon={ArrowLeft}
+              >
+                Voltar
+              </Button>
+              <Logo size="md" />
+            </div>
             <div className="flex items-center space-x-4">
               {!state.user?.hasOpenAIKey && (
                 <Button
@@ -42,7 +59,6 @@ export function Dashboard() {
                   Configurar OpenAI
                 </Button>
               )}
-              <span className="text-gray-300">Olá, {state.user?.name}</span>
               <Button
                 variant="ghost"
                 onClick={() => dispatch({ type: 'SET_SHOW_API_KEY_MODAL', payload: true })}
@@ -50,15 +66,20 @@ export function Dashboard() {
               >
                 Configurações
               </Button>
-              <Button variant="ghost" onClick={handleLogout} icon={LogOut}>
-                Sair
-              </Button>
             </div>
           </div>
         </div>
       </header>
 
       <div className="container mx-auto px-4 py-8">
+        {/* Welcome Section */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold mb-2">Dashboard</h1>
+          <p className="text-gray-400">
+            Gerencie seus bots e automatize suas conversas no WhatsApp
+          </p>
+        </div>
+
         {/* Stats Cards */}
         <div className="grid md:grid-cols-3 gap-6 mb-8">
           <Card className="p-6 bg-gray-900/50 backdrop-blur-sm border-gray-800 hover:border-blue-500/50 transition-all duration-300 group">
@@ -109,6 +130,7 @@ export function Dashboard() {
           <Button
             onClick={() => dispatch({ type: 'SET_CURRENT_PAGE', payload: 'create-bot' })}
             icon={Plus}
+            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
           >
             Criar Novo Bot
           </Button>
@@ -134,6 +156,7 @@ export function Dashboard() {
               <Button
                 onClick={() => dispatch({ type: 'SET_CURRENT_PAGE', payload: 'create-bot' })}
                 icon={Plus}
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
               >
                 Criar Primeiro Bot
               </Button>
@@ -152,6 +175,10 @@ export function Dashboard() {
                           {bot.name}
                         </h3>
                         <div className="flex items-center space-x-4 text-sm text-gray-400 mt-1">
+                          <span className="flex items-center">
+                            <Settings className="w-4 h-4 mr-1" />
+                            {bot.type === 'ai' ? 'IA' : bot.type === 'rules' ? 'Regras' : 'Híbrido'}
+                          </span>
                           <span className="flex items-center">
                             <MessageCircle className="w-4 h-4 mr-1" />
                             {bot.messagesCount} mensagens
@@ -178,21 +205,45 @@ export function Dashboard() {
                         variant="ghost"
                         onClick={() => {
                           dispatch({ type: 'SET_CURRENT_BOT', payload: bot.id });
-                          dispatch({ type: 'SET_CURRENT_PAGE', payload: 'bot-session' });
+                          dispatch({ type: 'SET_CURRENT_PAGE', payload: bot.type === 'ai' ? 'bot-session' : 'bot-builder' });
                         }}
                         className="hover:bg-blue-500/10 hover:text-blue-400"
                       >
-                        Abrir
+                        {bot.type === 'ai' ? 'Abrir' : 'Editar'}
                       </Button>
+                      {bot.type !== 'ai' && (
+                        <Button
+                          variant="ghost"
+                          onClick={() => {
+                            dispatch({ type: 'SET_CURRENT_BOT', payload: bot.id });
+                            dispatch({ type: 'SET_CURRENT_PAGE', payload: 'bot-session' });
+                          }}
+                          className="hover:bg-green-500/10 hover:text-green-400"
+                        >
+                          Testar
+                        </Button>
+                      )}
                     </div>
                   </div>
                   
-                  {/* Bot prompt preview */}
+                  {/* Bot prompt/flow preview */}
                   <div className="mt-4 p-3 bg-gray-800/50 rounded-lg border border-gray-700/50">
                     <p className="text-sm text-gray-300 line-clamp-2">
-                      <span className="font-medium text-gray-200">Prompt:</span> {bot.prompt}
-                        </p>
-                      </div>
+                      {bot.type === 'ai' ? (
+                        <>
+                          <span className="font-medium text-gray-200">Prompt:</span> {bot.prompt}
+                        </>
+                      ) : (
+                        <>
+                          <span className="font-medium text-gray-200">Fluxo:</span> {
+                            bot.flowData?.nodes?.length 
+                              ? `${bot.flowData.nodes.length} blocos configurados`
+                              : 'Fluxo não configurado'
+                          }
+                        </>
+                      )}
+                    </p>
+                  </div>
                 </Card>
               ))}
             </div>

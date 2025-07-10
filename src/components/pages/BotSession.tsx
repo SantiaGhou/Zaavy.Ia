@@ -46,6 +46,9 @@ export function BotSession() {
     const socket = apiService.connect();
     
     socket.on('qr-code', (data) => {
+      console.log('QR recebido:', data);
+      console.log('Bot do evento:', data.botId, 'Bot atual:', state.currentBotId); 
+
       if (data.botId === state.currentBotId) {
         setQrCode(data.qrCode);
         setIsConnecting(true);
