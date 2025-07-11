@@ -1,10 +1,10 @@
-const { prisma } = require('../config/database');
-const { v4: uuidv4 } = require('uuid');
+import { prisma } from '../config/database.js';
+import { randomUUID } from 'crypto';
 
 // Create new session
-const createSession = async (req, res) => {
+export const createSession = async (req, res) => {
   try {
-    const sessionId = uuidv4();
+    const sessionId = randomUUID();
     
     const session = await prisma.session.create({
       data: { sessionId }
@@ -21,21 +21,24 @@ const createSession = async (req, res) => {
 };
 
 // Save OpenAI API key
-const saveOpenAIKey = async (req, res) => {
+export const saveOpenAIKey = async (req, res) => {
   try {
     const { apiKey } = req.body;
-    const { sessionId } = req.session;
+    const sessionId = req.headers['x-session-id']; // pega a sessão do header
+
+    if (!sessionId) {
+      return res.status(400).json({ error: 'Session ID missing in request headers' });
+    }
 
     if (!apiKey || !apiKey.startsWith('sk-')) {
       return res.status(400).json({ error: 'Invalid OpenAI API key format' });
     }
 
-    // Test the API key
-    const OpenAI = require('openai');
     try {
+      const { default: OpenAI } = await import('openai');
       const openai = new OpenAI({ apiKey });
       await openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
+        model: "gpt-4o-mini",
         messages: [{ role: "user", content: "Test" }],
         max_tokens: 5
       });
@@ -43,7 +46,6 @@ const saveOpenAIKey = async (req, res) => {
       return res.status(400).json({ error: 'Invalid OpenAI API key' });
     }
 
-    // Update session with API key
     await prisma.session.update({
       where: { sessionId },
       data: { openaiKey: apiKey }
@@ -55,9 +57,8 @@ const saveOpenAIKey = async (req, res) => {
     res.status(500).json({ error: 'Failed to save OpenAI key' });
   }
 };
-
 // Get session info
-const getSessionInfo = async (req, res) => {
+export const getSessionInfo = async (req, res) => {
   try {
     const session = await prisma.session.findUnique({
       where: { sessionId: req.session.sessionId },
@@ -78,10 +79,4 @@ const getSessionInfo = async (req, res) => {
     console.error('Error getting session info:', error);
     res.status(500).json({ error: 'Failed to get session info' });
   }
-};
-
-module.exports = {
-  createSession,
-  saveOpenAIKey,
-  getSessionInfo
 };

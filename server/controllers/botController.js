@@ -1,8 +1,8 @@
-const { prisma } = require('../config/database');
-const { v4: uuidv4 } = require('uuid');
+import { prisma } from '../config/database.js';
+import { randomUUID } from 'crypto';
 
 // Get all bots for session
-const getBots = async (req, res) => {
+export const getBots = async (req, res) => {
   try {
     const bots = await prisma.bot.findMany({
       where: { sessionId: req.session.sessionId },
@@ -23,7 +23,7 @@ const getBots = async (req, res) => {
 };
 
 // Create new bot
-const createBot = async (req, res) => {
+export const createBot = async (req, res) => {
   try {
     const { name, prompt, type = 'ai', flowData } = req.body;
 
@@ -34,7 +34,7 @@ const createBot = async (req, res) => {
         prompt,
         type,
         flowData: flowData ? JSON.stringify(flowData) : null,
-        whatsappSessionId: uuidv4()
+        whatsappSessionId: randomUUID()
       }
     });
 
@@ -46,7 +46,7 @@ const createBot = async (req, res) => {
 };
 
 // Update bot
-const updateBot = async (req, res) => {
+export const updateBot = async (req, res) => {
   try {
     const { botId } = req.params;
     const updates = req.body;
@@ -82,7 +82,7 @@ const updateBot = async (req, res) => {
 };
 
 // Delete bot
-const deleteBot = async (req, res) => {
+export const deleteBot = async (req, res) => {
   try {
     const { botId } = req.params;
     
@@ -108,11 +108,4 @@ const deleteBot = async (req, res) => {
     console.error('Error deleting bot:', error);
     res.status(500).json({ error: 'Failed to delete bot' });
   }
-};
-
-module.exports = {
-  getBots,
-  createBot,
-  updateBot,
-  deleteBot
 };

@@ -1,10 +1,12 @@
-const { Client, LocalAuth } = require('whatsapp-web.js');
-const qrcode = require('qrcode');
-const { prisma } = require('../config/database');
-const { createMessage } = require('../controllers/messageController');
-const OpenAI = require('openai');
+import pkg from 'whatsapp-web.js';
+import qrcode from 'qrcode';
+import { prisma } from '../config/database.js';
+import { createMessage } from '../controllers/messageController.js';
+import { getIO } from '../index.js';
 
 // Active WhatsApp clients
+const { Client, LocalAuth } = pkg;
+
 const activeClients = new Map();
 
 class WhatsAppBot {
@@ -32,6 +34,8 @@ class WhatsAppBot {
       try {
         this.qrCode = await qrcode.toDataURL(qr);
         
+        console.log(`📱 QR Code generated for bot: ${this.botData.name}`);
+        
         // Save QR to database
         await prisma.whatsappSession.upsert({
           where: { botId: this.botData.id },
@@ -44,11 +48,13 @@ class WhatsAppBot {
         });
 
         // Emit to specific socket
-        const io = require('../index.js').getIO();
+        const io = getIO();
         io.to(this.socketId).emit('qr-code', {
           botId: this.botData.id,
           qrCode: this.qrCode
         });
+        
+        console.log(`✅ QR Code emitted to socket: ${this.socketId}`);
       } catch (error) {
         console.error('Error generating QR code:', error);
       }
@@ -56,6 +62,8 @@ class WhatsAppBot {
 
     this.client.on('ready', async () => {
       this.isReady = true;
+      
+      console.log(`✅ Bot ${this.botData.name} is ready!`);
       
       // Update bot status in database
       await prisma.bot.update({
@@ -70,7 +78,7 @@ class WhatsAppBot {
       // Update whatsapp session
       await prisma.whatsappSession.upsert({
         where: { botId: this.botData.id },
-        update: { isActive: true, connectedAt: new Date() },
+        update: { isActive: true, connectedAt: new Date(), qrCode: null },
         create: {
           botId: this.botData.id,
           isActive: true,
@@ -78,13 +86,11 @@ class WhatsAppBot {
         }
       });
 
-      const io = require('../index.js').getIO();
+      const io = getIO();
       io.to(this.socketId).emit('bot-ready', {
         botId: this.botData.id,
         status: 'online'
       });
-      
-      console.log(`✅ Bot ${this.botData.name} is ready!`);
     });
 
     this.client.on('message', async (message) => {
@@ -112,7 +118,7 @@ class WhatsAppBot {
         data: { isActive: false }
       });
 
-      const io = require('../index.js').getIO();
+      const io = getIO();
       io.to(this.socketId).emit('bot-disconnected', {
         botId: this.botData.id,
         reason
@@ -142,7 +148,7 @@ class WhatsAppBot {
       });
 
       // Emit to frontend
-      const io = require('../index.js').getIO();
+      const io = getIO();
       io.to(this.socketId).emit('new-message', {
         ...messageData,
         id: savedMessage.id,
@@ -188,6 +194,7 @@ class WhatsAppBot {
         return "Erro: Chave da OpenAI não configurada. Configure sua chave nas configurações.";
       }
 
+      const { default: OpenAI } = await import('openai');
       const openai = new OpenAI({
         apiKey: this.sessionOpenAIKey,
       });
@@ -275,6 +282,7 @@ class WhatsAppBot {
 
   async generateAIResponseWithPrompt(userMessage, customPrompt) {
     try {
+      const { default: OpenAI } = await import('openai');
       const openai = new OpenAI({
         apiKey: this.sessionOpenAIKey,
       });
@@ -310,7 +318,7 @@ class WhatsAppBot {
 }
 
 // Create WhatsApp bot instance
-const createWhatsAppBot = async (botData, sessionOpenAIKey, socketId) => {
+export const createWhatsAppBot = async (botData, sessionOpenAIKey, socketId) => {
   const bot = new WhatsAppBot(botData, sessionOpenAIKey, socketId);
   activeClients.set(botData.id, bot);
   await bot.initialize();
@@ -318,7 +326,7 @@ const createWhatsAppBot = async (botData, sessionOpenAIKey, socketId) => {
 };
 
 // Destroy WhatsApp bot instance
-const destroyWhatsAppBot = async (botId) => {
+export const destroyWhatsAppBot = async (botId) => {
   const bot = activeClients.get(botId);
   if (bot) {
     await bot.destroy();
@@ -327,12 +335,12 @@ const destroyWhatsAppBot = async (botId) => {
 };
 
 // Get active bot
-const getActiveBot = (botId) => {
+export const getActiveBot = (botId) => {
   return activeClients.get(botId);
 };
 
 // Cleanup all bots
-const cleanupAllBots = async () => {
+export const cleanupAllBots = async () => {
   for (const [botId, client] of activeClients) {
     try {
       await client.destroy();
@@ -341,11 +349,4 @@ const cleanupAllBots = async () => {
     }
   }
   activeClients.clear();
-};
-
-module.exports = {
-  createWhatsAppBot,
-  destroyWhatsAppBot,
-  getActiveBot,
-  cleanupAllBots
 };

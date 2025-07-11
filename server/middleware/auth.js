@@ -1,7 +1,7 @@
-const { prisma } = require('../config/database');
+import { prisma } from '../config/database.js';
 
 // Simple session-based auth middleware
-const authenticateSession = async (req, res, next) => {
+export const authenticateSession = async (req, res, next) => {
   try {
     const sessionId = req.headers['x-session-id'];
     
@@ -26,8 +26,4 @@ const authenticateSession = async (req, res, next) => {
     console.error('Auth middleware error:', error);
     res.status(500).json({ error: 'Authentication failed' });
   }
-};
-
-module.exports = {
-  authenticateSession
 };

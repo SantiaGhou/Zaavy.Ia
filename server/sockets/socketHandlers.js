@@ -1,7 +1,7 @@
-const { prisma } = require('../config/database');
-const { createWhatsAppBot, destroyWhatsAppBot } = require('../services/whatsappService');
+import { prisma } from '../config/database.js';
+import { createWhatsAppBot, destroyWhatsAppBot } from '../services/whatsappService.js';
 
-const handleSocketConnection = (io, socket) => {
+export const handleSocketConnection = (io, socket) => {
   console.log('🔌 Client connected:', socket.id);
 
   // Authenticate socket with session ID
@@ -40,6 +40,8 @@ const handleSocketConnection = (io, socket) => {
 
     try {
       const { botId } = data;
+      
+      console.log(`🤖 Creating bot: ${botId} for socket: ${socket.id}`);
       
       // Get bot and session data
       const bot = await prisma.bot.findFirst({
@@ -100,8 +102,4 @@ const handleSocketConnection = (io, socket) => {
   socket.on('disconnect', () => {
     console.log('❌ Client disconnected:', socket.id);
   });
-};
-
-module.exports = {
-  handleSocketConnection
 };

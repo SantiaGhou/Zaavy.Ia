@@ -1,7 +1,7 @@
-const { prisma } = require('../config/database');
+import { prisma } from '../config/database.js';
 
 // Get messages for a bot
-const getMessages = async (req, res) => {
+export const getMessages = async (req, res) => {
   try {
     const { botId } = req.params;
     
@@ -30,7 +30,7 @@ const getMessages = async (req, res) => {
 };
 
 // Create message
-const createMessage = async (botId, messageData) => {
+export const createMessage = async (botId, messageData) => {
   try {
     const message = await prisma.message.create({
       data: {
@@ -53,9 +53,4 @@ const createMessage = async (botId, messageData) => {
     console.error('Error creating message:', error);
     throw error;
   }
-};
-
-module.exports = {
-  getMessages,
-  createMessage
 };

@@ -1,27 +1,28 @@
-const express = require('express');
-const router = express.Router();
+import express from 'express';
 
 // Import controllers
-const sessionController = require('../controllers/sessionController');
-const botController = require('../controllers/botController');
-const messageController = require('../controllers/messageController');
+import { createSession, saveOpenAIKey, getSessionInfo } from '../controllers/sessionController.js';
+import { getBots, createBot, updateBot, deleteBot } from '../controllers/botController.js';
+import { getMessages } from '../controllers/messageController.js';
 
 // Import middleware
-const { authenticateSession } = require('../middleware/auth');
+import { authenticateSession } from '../middleware/auth.js';
+
+const router = express.Router();
 
 // Session routes
-router.post('/session', sessionController.createSession);
-router.post('/session/openai-key', authenticateSession, sessionController.saveOpenAIKey);
-router.get('/session/info', authenticateSession, sessionController.getSessionInfo);
+router.post('/session', createSession);
+router.post('/session/openai-key', authenticateSession, saveOpenAIKey);
+router.get('/session/info', authenticateSession, getSessionInfo);
 
 // Bot routes
-router.get('/bots', authenticateSession, botController.getBots);
-router.post('/bots', authenticateSession, botController.createBot);
-router.put('/bots/:botId', authenticateSession, botController.updateBot);
-router.delete('/bots/:botId', authenticateSession, botController.deleteBot);
+router.get('/bots', authenticateSession, getBots);
+router.post('/bots', authenticateSession, createBot);
+router.put('/bots/:botId', authenticateSession, updateBot);
+router.delete('/bots/:botId', authenticateSession, deleteBot);
 
 // Message routes
-router.get('/messages/:botId', authenticateSession, messageController.getMessages);
+router.get('/messages/:botId', authenticateSession, getMessages);
 
 // Health check
 router.get('/health', (req, res) => {
@@ -32,4 +33,4 @@ router.get('/health', (req, res) => {
   });
 });
 
-module.exports = router;
+export default router;

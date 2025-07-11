@@ -45,11 +45,18 @@ export function BotSession() {
   useEffect(() => {
     const socket = apiService.connect();
     
+    // Listen for authentication success
+    socket.on('authenticated', (data) => {
+      if (data.success) {
+        console.log('✅ Socket authenticated successfully');
+      } else {
+        console.error('❌ Socket authentication failed:', data.error);
+      }
+    });
+    
     socket.on('qr-code', (data) => {
-      console.log('QR recebido:', data);
-      console.log('Bot do evento:', data.botId, 'Bot atual:', state.currentBotId); 
-
       if (data.botId === state.currentBotId) {
+        console.log('📱 QR Code received for bot:', data.botId);
         setQrCode(data.qrCode);
         setIsConnecting(true);
       }
@@ -95,6 +102,7 @@ export function BotSession() {
     });
 
     return () => {
+      socket.off('authenticated');
       socket.off('qr-code');
       socket.off('bot-ready');
       socket.off('new-message');
@@ -104,11 +112,14 @@ export function BotSession() {
 
   useEffect(() => {
     if (currentBot && !currentBot.isConnected) {
+      console.log('🔄 Attempting to create bot:', currentBot.id);
       const socket = apiService.getSocket();
       if (socket) {
         socket.emit('create-bot', {
           botId: currentBot.id
         });
+      } else {
+        console.error('❌ Socket not available');
       }
     }
   }, [currentBot]);

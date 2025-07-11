@@ -77,7 +77,10 @@ class ApiService {
       // Authenticate socket connection
       const sessionId = this.getSessionId();
       if (sessionId) {
+        console.log('🔐 Authenticating socket with session:', sessionId);
         this.socket.emit('authenticate', { sessionId });
+      } else {
+        console.warn('⚠️ No session ID available for socket authentication');
       }
     }
     return this.socket;

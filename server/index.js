@@ -1,21 +1,24 @@
-const express = require('express');
-const cors = require('cors');
-const http = require('http');
-const socketIo = require('socket.io');
-require('dotenv').config();
+import express from 'express';
+import cors from 'cors';
+import { createServer } from 'http';
+import { Server } from 'socket.io';
+import dotenv from 'dotenv';
 
 // Import configurations and services
-const { connectDatabase, disconnectDatabase } = require('./config/database');
-const { handleSocketConnection } = require('./sockets/socketHandlers');
-const { cleanupAllBots } = require('./services/whatsappService');
-const apiRoutes = require('./routes/api');
+import { connectDatabase, disconnectDatabase } from './config/database.js';
+import { handleSocketConnection } from './sockets/socketHandlers.js';
+import { cleanupAllBots } from './services/whatsappService.js';
+import apiRoutes from './routes/api.js';
+
+// Load environment variables
+dotenv.config();
 
 // Initialize Express app
 const app = express();
-const server = http.createServer(app);
+const server = createServer(app);
 
 // Initialize Socket.IO
-const io = socketIo(server, {
+const io = new Server(server, {
   cors: {
     origin: process.env.FRONTEND_URL || "http://localhost:5173",
     methods: ["GET", "POST"]
@@ -36,7 +39,7 @@ io.on('connection', (socket) => {
 
 // Make IO available to other modules
 let ioInstance = io;
-const getIO = () => ioInstance;
+export const getIO = () => ioInstance;
 
 // Graceful shutdown
 const gracefulShutdown = async (signal) => {
@@ -84,9 +87,6 @@ const startServer = async () => {
     process.exit(1);
   }
 };
-
-// Export for other modules
-module.exports = { getIO };
 
 // Start the server
 startServer();
