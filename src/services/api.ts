@@ -5,10 +5,10 @@ class ApiService {
   private baseUrl = 'http://localhost:3001';
   private sessionId: string | null = null;
 
-  // Session management
+  // Session management with cookies
   getSessionId() {
     if (!this.sessionId) {
-      this.sessionId = localStorage.getItem('sessionId');
+      this.sessionId = this.getCookie('sessionId');
     }
     return this.sessionId;
   }
@@ -16,12 +16,35 @@ class ApiService {
   setSessionId(sessionId: string | null) {
     this.sessionId = sessionId;
     if (sessionId) {
-      localStorage.setItem('sessionId', sessionId);
+      this.setCookie('sessionId', sessionId, 30); // 30 days
     } else {
-      localStorage.removeItem('sessionId');
+      this.deleteCookie('sessionId');
     }
   }
 
+  // Cookie utilities
+  private setCookie(name: string, value: string, days: number) {
+    const expires = new Date();
+    expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000));
+    document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/;SameSite=Lax`;
+  }
+
+  private getCookie(name: string): string | null {
+    const nameEQ = name + "=";
+    const ca = document.cookie.split(';');
+    for (let i = 0; i < ca.length; i++) {
+      let c = ca[i];
+      while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+      if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+    }
+    return null;
+  }
+
+  private deleteCookie(name: string) {
+    document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;`;
+  }
+
+  // Session headers
   getSessionHeaders() {
     const sessionId = this.getSessionId();
     return sessionId ? { 'X-Session-ID': sessionId } : {};
@@ -100,13 +123,13 @@ class ApiService {
   // OpenAI API key
   async saveOpenAIKey(apiKey: string) {
     try {
+      const sessionId = this.getSessionId();
       const response = await fetch(`${this.baseUrl}/api/session/openai-key`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...this.getSessionHeaders(),
         },
-        body: JSON.stringify({ apiKey }),
+        body: JSON.stringify({ sessionId, apiKey }),
       });
       
       const data = await response.json();
@@ -124,13 +147,13 @@ class ApiService {
   // Bot management
   async createBot(botData: { name: string; type: string; prompt?: string; flowData?: any }) {
     try {
+      const sessionId = this.getSessionId();
       const response = await fetch(`${this.baseUrl}/api/bots`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...this.getSessionHeaders(),
         },
-        body: JSON.stringify(botData),
+        body: JSON.stringify({ ...botData, sessionId }),
       });
       
       const data = await response.json();
@@ -147,13 +170,13 @@ class ApiService {
 
   async updateBot(botId: string, updates: any) {
     try {
+      const sessionId = this.getSessionId();
       const response = await fetch(`${this.baseUrl}/api/bots/${botId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          ...this.getSessionHeaders(),
         },
-        body: JSON.stringify(updates),
+        body: JSON.stringify({ ...updates, sessionId }),
       });
       
       const data = await response.json();
@@ -188,9 +211,12 @@ class ApiService {
 
   async deleteBot(botId: string) {
     try {
+      const sessionId = this.getSessionId();
       const response = await fetch(`${this.baseUrl}/api/bots/${botId}`, {
         method: 'DELETE',
-        headers: this.getSessionHeaders(),
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
       
       const data = await response.json();
@@ -237,28 +263,31 @@ class ApiService {
 
   // Initialize session
   async initializeSession() {
-    let sessionId = this.getSessionId();
+    const sessionId = this.getSessionId();
     
-    if (!sessionId) {
-      const sessionData = await this.createSession();
-      sessionId = sessionData.sessionId;
-    }
-
     try {
-      const sessionInfo = await this.getSessionInfo();
+      const response = await fetch(`${this.baseUrl}/api/session/initialize`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ sessionId }),
+      });
+      
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error);
+      }
+      
+      this.setSessionId(data.sessionId);
       return {
-        sessionId,
-        hasOpenAIKey: sessionInfo.hasOpenAIKey,
-        botsCount: sessionInfo.botsCount
+        sessionId: data.sessionId,
+        hasOpenAIKey: data.hasOpenAIKey,
+        botsCount: data.botsCount
       };
     } catch (error) {
-      // If session is invalid, create a new one
-      const sessionData = await this.createSession();
-      return {
-        sessionId: sessionData.sessionId,
-        hasOpenAIKey: false,
-        botsCount: 0
-      };
+      console.error('Error initializing session:', error);
+      throw error;
     }
   }
 

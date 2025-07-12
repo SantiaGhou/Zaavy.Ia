@@ -1,0 +1,38 @@
+{
+  "name": "zaavy-ia-backend",
+  "version": "1.0.0",
+  "description": "Backend para Zaavy.ia - Plataforma de Bots WhatsApp com IA",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "echo \"No tests specified\" && exit 0"
+  },
+  "keywords": [
+    "whatsapp",
+    "bot",
+    "ai",
+    "chatbot",
+    "openai"
+  ],
+  "author": "Zaavy.ia Team",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "openai": "^4.28.0",
+    "puppeteer": "^24.12.1",
+    "qrcode": "^1.5.3",
+    "socket.io": "^4.8.1",
+    "whatsapp-web.js": "^1.23.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  }
+}

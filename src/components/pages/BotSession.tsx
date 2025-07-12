@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Bot, MessageCircle, QrCode, Phone, Send, Trash2, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Bot, MessageCircle, Send, Trash2, AlertCircle } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
 import { Badge } from '../ui/Badge';
 import { Logo } from '../ui/Logo';
+import { QRCodeDisplay } from '../ui/QRCodeDisplay';
 import { useApp } from '../../context/AppContext';
 import { apiService } from '../../services/api';
 
@@ -55,14 +56,17 @@ export function BotSession() {
     });
     
     socket.on('qr-code', (data) => {
+      console.log('📱 QR Code received from backend:', data);
       if (data.botId === state.currentBotId) {
-        console.log('📱 QR Code received for bot:', data.botId);
+        console.log('📱 Setting QR Code for current bot:', data.botId);
         setQrCode(data.qrCode);
         setIsConnecting(true);
+        setLoading(false);
       }
     });
 
     socket.on('bot-ready', (data) => {
+      console.log('✅ Bot ready event received:', data);
       if (data.botId === state.currentBotId) {
         dispatch({
           type: 'UPDATE_BOT',
@@ -77,6 +81,7 @@ export function BotSession() {
         });
         setQrCode(null);
         setIsConnecting(false);
+        setLoading(false);
       }
     });
 
@@ -87,6 +92,7 @@ export function BotSession() {
     });
 
     socket.on('bot-disconnected', (data) => {
+      console.log('❌ Bot disconnected event received:', data);
       if (data.botId === state.currentBotId) {
         dispatch({
           type: 'UPDATE_BOT',
@@ -98,6 +104,17 @@ export function BotSession() {
             }
           }
         });
+        setQrCode(null);
+        setIsConnecting(false);
+      }
+    });
+
+    socket.on('bot-error', (data) => {
+      console.error('❌ Bot error received:', data);
+      if (data.botId === state.currentBotId) {
+        setLoading(false);
+        setIsConnecting(false);
+        // You can add error state handling here if needed
       }
     });
 
@@ -107,19 +124,26 @@ export function BotSession() {
       socket.off('bot-ready');
       socket.off('new-message');
       socket.off('bot-disconnected');
+      socket.off('bot-error');
     };
   }, [state.currentBotId, dispatch]);
 
   useEffect(() => {
     if (currentBot && !currentBot.isConnected) {
       console.log('🔄 Attempting to create bot:', currentBot.id);
+      setLoading(true);
+      setIsConnecting(false);
+      setQrCode(null);
+      
       const socket = apiService.getSocket();
       if (socket) {
+        console.log('🔄 Emitting create-bot event for:', currentBot.id);
         socket.emit('create-bot', {
           botId: currentBot.id
         });
       } else {
         console.error('❌ Socket not available');
+        setLoading(false);
       }
     }
   }, [currentBot]);
@@ -265,45 +289,26 @@ export function BotSession() {
               </Card>
             )}
 
-            {!currentBot.isConnected ? (
-              <Card className="p-6 text-center bg-gray-900/50 backdrop-blur-sm border-gray-800">
-                <QrCode className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-                <h3 className="font-medium mb-2">
-                  {isConnecting ? 'Aguardando Conexão...' : 'Conectar ao WhatsApp'}
-                </h3>
-                <p className="text-gray-400 mb-4">
-                  {qrCode ? 'Escaneie o QR Code abaixo com seu WhatsApp' : 'Gerando QR Code...'}
-                </p>
+            <QRCodeDisplay
+              qrCode={qrCode}
+              isConnecting={isConnecting}
+              isConnected={currentBot.isConnected}
+              botName={currentBot.name}
+              onRetry={() => {
+                console.log('🔄 Retry button clicked, recreating bot');
+                setLoading(true);
+                setIsConnecting(false);
+                setQrCode(null);
                 
-                {qrCode && (
-                  <div className="mb-4">
-                    <img
-                      src={qrCode}
-                      alt="QR Code"
-                      className="mx-auto border border-gray-700 rounded-lg bg-white p-4"
-                    />
-                  </div>
-                )}
-                
-                {isConnecting && (
-                  <div className="flex items-center justify-center space-x-2">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
-                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce delay-100"></div>
-                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce delay-200"></div>
-                    <span className="text-sm text-gray-400 ml-2">Conectando...</span>
-                  </div>
-                )}
-              </Card>
-            ) : (
-              <Card className="p-6 text-center bg-gray-900/50 backdrop-blur-sm border-gray-800">
-                <Phone className="w-16 h-16 text-green-500 mx-auto mb-4" />
-                <h3 className="font-medium mb-2">WhatsApp Conectado</h3>
-                <p className="text-gray-400 mb-4">
-                  Seu bot está ativo e pronto para receber mensagens
-                </p>
-                <Badge variant="success">Online</Badge>
-              </Card>
-            )}
+                const socket = apiService.getSocket();
+                if (socket) {
+                  socket.emit('create-bot', { botId: currentBot.id });
+                } else {
+                  console.error('❌ Socket not available for retry');
+                  setLoading(false);
+                }
+              }}
+            />
           </div>
 
           {/* Messages */}

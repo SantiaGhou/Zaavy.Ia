@@ -1,23 +1,9 @@
 # 🤖 Zaavy.ia - Plataforma de Bots WhatsApp com IA
 
-<div align="center">
 
-![Zaavy.ia Logo](https://img.shields.io/badge/Zaavy.ia-Bot%20Platform-blue?style=for-the-badge&logo=whatsapp&logoColor=white)
-
-[![Node.js](https://img.shields.io/badge/Node.js-18+-green?style=flat-square&logo=node.js)](https://nodejs.org/)
-[![React](https://img.shields.io/badge/React-18+-blue?style=flat-square&logo=react)](https://reactjs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5+-blue?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
-[![Prisma](https://img.shields.io/badge/Prisma-5+-purple?style=flat-square&logo=prisma)](https://www.prisma.io/)
-[![OpenAI](https://img.shields.io/badge/OpenAI-GPT--3.5-orange?style=flat-square&logo=openai)](https://openai.com/)
-[![WhatsApp](https://img.shields.io/badge/WhatsApp-Web.js-green?style=flat-square&logo=whatsapp)](https://wwebjs.dev/)
-
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
-[![GitHub Stars](https://img.shields.io/github/stars/yourusername/zaavy-ia?style=flat-square)](https://github.com/yourusername/zaavy-ia/stargazers)
 
 **Uma plataforma completa para criar e gerenciar bots inteligentes no WhatsApp usando OpenAI GPT e whatsapp-web.js**
 
-[🚀 Demo](https://zaavy-ia.vercel.app) • [📖 Documentação](#-documentação) • [🐛 Reportar Bug](https://github.com/yourusername/zaavy-ia/issues) • [💡 Solicitar Feature](https://github.com/yourusername/zaavy-ia/issues)
 
 </div>
 
@@ -59,7 +45,6 @@
 - 📡 **Socket.IO** para comunicação em tempo real
 - 📱 **WhatsApp Web.js** para integração WhatsApp
 - 🤖 **OpenAI API** para inteligência artificial
-- 🗄️ **Prisma ORM** + SQLite para banco de dados
 
 ### **DevOps & Ferramentas**
 - 📦 **ES Modules** (ESM) em todo o projeto
@@ -78,7 +63,7 @@
 
 ### **1. Clone o Repositório**
 ```bash
-git clone https://github.com/yourusername/zaavy-ia.git
+git clone https://github.com/SantiaGhou/zaavy.ia.git
 cd zaavy-ia
 ```
 
@@ -98,20 +83,10 @@ PORT=3001
 NODE_ENV=development
 FRONTEND_URL=http://localhost:5173
 
-# Database
-DATABASE_URL="file:./dev.db"
 ```
 
-### **4. Configure o Banco de Dados**
-```bash
-# Gerar cliente Prisma
-npm run db:generate
 
-# Aplicar schema ao banco
-npm run db:push
-```
-
-### **5. Execute o Projeto**
+### **4. Execute o Projeto**
 ```bash
 # Executar frontend e backend simultaneamente
 npm run dev
@@ -157,26 +132,6 @@ npm run server        # Backend (porta 3001)
 
 ---
 
-## 🎨 Screenshots
-
-<div align="center">
-
-### 🏠 Landing Page
-![Landing Page](https://via.placeholder.com/800x400/1a1a1a/ffffff?text=Landing+Page+Screenshot)
-
-### 📊 Dashboard
-![Dashboard](https://via.placeholder.com/800x400/1a1a1a/ffffff?text=Dashboard+Screenshot)
-
-### 🛠️ Construtor de Fluxo
-![Bot Builder](https://via.placeholder.com/800x400/1a1a1a/ffffff?text=Bot+Builder+Screenshot)
-
-### 💬 Chat Interface
-![Chat Interface](https://via.placeholder.com/800x400/1a1a1a/ffffff?text=Chat+Interface+Screenshot)
-
-</div>
-
----
-
 ## 🏗️ Arquitetura do Projeto
 
 ```
@@ -189,13 +144,7 @@ zaavy-ia/
 │   ├── 📁 services/                # Serviços e APIs
 │   └── 📁 types/                   # Tipos TypeScript
 ├── 📁 server/                      # Backend Node.js
-│   ├── 📁 config/                  # Configurações
-│   ├── 📁 controllers/             # Controladores
-│   ├── 📁 middleware/              # Middlewares
-│   ├── 📁 routes/                  # Rotas da API
-│   ├── 📁 services/                # Serviços do backend
-│   └── 📁 sockets/                 # Handlers Socket.IO
-├── 📁 prisma/                      # Schema do banco
+│   ├── idex.js                     # Servidor
 └── 📄 package.json                 # Dependências
 ```
 
@@ -208,13 +157,7 @@ zaavy-ia/
 npm run dev              # Frontend + Backend
 npm run dev:frontend     # Apenas frontend
 npm run server          # Apenas backend
-
-# Banco de Dados
-npm run db:generate     # Gerar cliente Prisma
-npm run db:push         # Aplicar schema
-npm run db:studio       # Interface visual do banco
-npm run db:reset        # Resetar banco
-
+"
 # Produção
 npm run build           # Build para produção
 npm run preview         # Preview do build
@@ -228,7 +171,7 @@ Contribuições são sempre bem-vindas! Veja como você pode ajudar:
 
 ### **1. 🍴 Fork o Projeto**
 ```bash
-git clone https://github.com/yourusername/zaavy-ia.git
+git clone https://github.com/SantiaGhou/zaavy.ia.git
 ```
 
 ### **2. 🌿 Crie uma Branch**
@@ -283,21 +226,18 @@ git push origin feature/nova-funcionalidade
 
 ## 📊 Status do Projeto
 
-![GitHub last commit](https://img.shields.io/github/last-commit/yourusername/zaavy-ia?style=flat-square)
-![GitHub issues](https://img.shields.io/github/issues/yourusername/zaavy-ia?style=flat-square)
-![GitHub pull requests](https://img.shields.io/github/issues-pr/yourusername/zaavy-ia?style=flat-square)
-
+![GitHub last commit](https://img.shields.io/github/last-commit/SantiaGhou/zaavy.ia?style=flat-square)
+![GitHub issues](https://img.shields.io/github/issues/SantiaGhou/zaavy.ia?style=flat-square)
 ---
 
 ## 👨‍💻 Autor
 
 <div align="center">
 
-**Desenvolvido com ❤️ por [Seu Nome](https://github.com/yourusername)**
+**Desenvolvido com ❤️ por [SantiaGhou](https://github.com/SantiaGhou)**
 
-[![GitHub](https://img.shields.io/badge/GitHub-yourusername-black?style=flat-square&logo=github)](https://github.com/yourusername)
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-Seu%20Nome-blue?style=flat-square&logo=linkedin)](https://linkedin.com/in/yourprofile)
-[![Twitter](https://img.shields.io/badge/Twitter-@yourusername-blue?style=flat-square&logo=twitter)](https://twitter.com/yourusername)
+[![GitHub](https://img.shields.io/badge/GitHub-SantiaGhou-black?style=flat-square&logo=github)](https://github.com/SantiaGhou)
+
 
 </div>
 
@@ -323,6 +263,6 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para ma
 
 **⭐ Se este projeto te ajudou, considere dar uma estrela!**
 
-[![GitHub stars](https://img.shields.io/github/stars/yourusername/zaavy-ia?style=social)](https://github.com/yourusername/zaavy-ia/stargazers)
+[![GitHub stars](https://img.shields.io/github/stars/SantiaGhou/zaavy.ia?style=social)](https://github.com/SantiaGhou/zaavy.ia/stargazers)
 
 </div>
