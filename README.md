@@ -276,10 +276,10 @@ git push origin feature/nova-funcionalidade
 
 ### **🐛 Melhorias Planejadas**
 - [ ] Otimização de performance
-- [ ] Testes automatizados
+- [ ] Correção de bugs no sistema de envio de pdf
 - [ ] Documentação expandida
-- [ ] Docker support
-- [ ] CI/CD pipeline
+- [ ] Suporte a mais i.as
+- [ ] Resolver Bugs do sistema de criação de bot com regras
 
 
 ---
