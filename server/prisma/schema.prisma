@@ -1,0 +1,130 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL") // Use environment variable
+}
+
+model User {
+  id          String   @id @default(cuid())
+  sessionId   String   @unique
+  openaiKey   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  bots        Bot[]
+  documents   Document[]
+  
+  @@map("users")
+}
+
+model Bot {
+  id            String   @id @default(cuid())
+  name          String
+  prompt        String?  @default("Você é um assistente útil e amigável.")
+  type          String   @default("ai") // 'ai', 'rules', 'hybrid'
+  status        String   @default("offline") // 'online', 'offline', 'connecting'
+  isConnected   Boolean  @default(false)
+  messagesCount Int      @default(0)
+  
+  // AI Configuration
+  temperature   Float    @default(0.7)
+  model         String   @default("gpt-3.5-turbo")
+  maxTokens     Int      @default(500)
+  
+  // Flow Data (JSON)
+  flowData      String?  // JSON string for rules/hybrid bots
+  
+  // Timestamps
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  lastActivity  DateTime?
+  
+  // Relations
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  conversations Conversation[]
+  messages      Message[]
+  
+  @@index([userId])
+  @@map("bots")
+}
+
+model Conversation {
+  id            String    @id @default(cuid())
+  phoneNumber   String
+  userName      String?
+  isActive      Boolean   @default(true)
+  context       String?   // Compressed conversation context
+  
+  // Timestamps
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  lastMessage   DateTime?
+  
+  // Relations
+  botId         String
+  bot           Bot       @relation(fields: [botId], references: [id], onDelete: Cascade)
+  messages      Message[]
+  
+  @@unique([botId, phoneNumber])
+  @@index([botId])
+  @@map("conversations")
+}
+
+model Message {
+  id              String   @id @default(cuid())
+  content         String
+  sender          String   // 'user' or 'bot'
+  phoneNumber     String?
+  userName        String?
+  
+  // AI Metadata
+  tokensUsed      Int?
+  model           String?
+  temperature     Float?
+  
+  // Timestamps
+  createdAt       DateTime @default(now())
+  
+  // Relations
+  botId           String
+  bot             Bot      @relation(fields: [botId], references: [id], onDelete: Cascade)
+  conversationId  String
+  conversation    Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  
+  @@index([botId])
+  @@index([conversationId])
+  @@map("messages")
+}
+
+model Document {
+  id            String   @id @default(cuid())
+  filename      String
+  originalName  String
+  mimeType      String
+  size          Int
+  content       String   // Extracted text content
+  chunks        String   // JSON array of text chunks
+  embeddings    String?  // JSON array of embeddings (optional)
+  
+  // Metadata
+  pageCount     Int?
+  language      String?
+  
+  // Timestamps
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  // Relations
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@map("documents")
+}
