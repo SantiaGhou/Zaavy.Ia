@@ -10,6 +10,15 @@ export interface Bot {
   lastActivity?: Date;
   sessionId?: string;
   isConnected: boolean;
+  
+  // AI Configuration
+  temperature: number;
+  model: string;
+  maxTokens: number;
+  
+  // Database fields
+  updatedAt?: Date;
+  userId?: string;
 }
 
 export interface FlowData {
@@ -53,6 +62,14 @@ export interface Message {
   timestamp: Date;
   phoneNumber?: string;
   userName?: string;
+  
+  // AI Metadata
+  tokensUsed?: number;
+  model?: string;
+  temperature?: number;
+  
+  // Database relations
+  conversationId?: string;
 }
 
 export interface User {
@@ -76,4 +93,43 @@ export interface Session {
   isActive: boolean;
   connectedAt?: Date;
   lastMessage?: Date;
+}
+
+export interface Document {
+  id: string;
+  filename: string;
+  originalName: string;
+  mimeType: string;
+  size: number;
+  content?: string;
+  chunks?: string[];
+  pageCount?: number;
+  createdAt: Date;
+  updatedAt?: Date;
+}
+
+export interface Conversation {
+  id: string;
+  botId: string;
+  phoneNumber: string;
+  userName?: string;
+  isActive: boolean;
+  context?: string;
+  createdAt: Date;
+  updatedAt: Date;
+  lastMessage?: Date;
+  messages?: Message[];
+}
+
+export interface AIModel {
+  id: string;
+  name: string;
+  description: string;
+  maxTokens: number;
+  costPer1k: number;
+}
+
+export interface BotState {
+  stopped?: boolean;
+  processing?: boolean;
 }

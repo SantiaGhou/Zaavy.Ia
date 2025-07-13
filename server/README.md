@@ -1,7 +1,8 @@
-# Zaavy.ia Backend
+# Backend
 
-Backend isolado para a plataforma Zaavy.ia de bots WhatsApp com IA.
+Backend completo para a plataforma Zaavy.ia de bots WhatsApp com IA.
 
+**Repositório:** [SantiaGhou/Zaavy.Ia](https://github.com/SantiaGhou/Zaavy.Ia)
 ## 🚀 Instalação Rápida
 
 ```bash
@@ -27,6 +28,10 @@ npm run dev
 - **qrcode**: Geração de QR codes
 - **openai**: Integração com ChatGPT
 - **dotenv**: Variáveis de ambiente
+- **prisma**: ORM para banco de dados
+- **pdf-parse**: Processamento de PDFs
+- **multer**: Upload de arquivos
+- **tiktoken**: Contagem de tokens
 
 ## 🔧 Scripts Disponíveis
 
@@ -45,9 +50,26 @@ npm run dev
 - `POST /api/bots`: Criar bot
 - `PUT /api/bots/:id`: Atualizar bot
 - `DELETE /api/bots/:id`: Deletar bot
+- `POST /api/bots/:id/stop`: Parar bot
+- `POST /api/bots/:id/start`: Iniciar bot
 
 ### Mensagens
 - `GET /api/messages/:botId`: Listar mensagens do bot
+
+### Documentos
+- `POST /api/documents/upload`: Upload de PDF
+- `GET /api/documents`: Listar documentos
+- `DELETE /api/documents/:id`: Deletar documento
+- `GET /api/documents/search/:query`: Buscar documentos
+
+### IA
+- `GET /api/ai/models`: Modelos disponíveis
+- `POST /api/ai/validate-key`: Validar chave OpenAI
+- `POST /api/ai/test`: Testar configuração
+
+### Conversas
+- `GET /api/conversations/:botId`: Listar conversas
+- `GET /api/conversations/:botId/stats`: Estatísticas
 
 ### Saúde
 - `GET /api/health`: Status do servidor
@@ -69,11 +91,10 @@ npm run dev
 
 ## 💾 Armazenamento
 
-O backend usa armazenamento em memória para:
-- Sessões de usuário
-- Dados dos bots
-- Mensagens
-- Clientes WhatsApp ativos
+O backend usa:
+- **Prisma + SQLite**: Dados persistentes (usuários, bots, mensagens, documentos)
+- **Memória**: Sessões temporárias e clientes WhatsApp ativos
+- **Sistema de arquivos**: PDFs enviados (pasta uploads/)
 
 ## 🔒 Variáveis de Ambiente
 
@@ -104,6 +125,7 @@ npm install
 - Node.js >= 18.0.0
 - npm >= 8.0.0
 - Chromium/Chrome (para WhatsApp Web)
+- Espaço em disco para uploads de PDFs
 
 ## 🔄 Desenvolvimento
 
@@ -114,3 +136,40 @@ Logs detalhados mostram:
 - Geração de QR codes
 - Status dos bots
 - Mensagens processadas
+- Uploads de documentos
+- Operações de banco de dados
+
+## 🗄️ Banco de Dados
+
+O projeto usa Prisma com SQLite para desenvolvimento. Para produção, pode ser facilmente migrado para PostgreSQL ou MySQL.
+
+### Comandos Úteis
+```bash
+# Visualizar banco
+npx prisma studio
+
+# Reset completo
+npx prisma db push --force-reset
+
+# Gerar cliente
+npx prisma generate
+```
+
+## 📄 Processamento de PDFs
+
+- Suporte a arquivos até 10MB
+- Extração automática de texto
+- Divisão em chunks para melhor processamento
+- Busca semântica no conteúdo
+
+## 🤖 Configurações de IA
+
+- Múltiplos modelos OpenAI suportados
+- Controle de temperature (criatividade)
+- Configuração de tokens máximos
+- Validação automática de chaves API
+
+---
+
+**Desenvolvido por [SantiaGhou](https://github.com/SantiaGhou)**  
+**Repositório:** [Zaavy.Ia](https://github.com/SantiaGhou/Zaavy.Ia)

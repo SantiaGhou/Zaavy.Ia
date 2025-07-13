@@ -1,15 +1,23 @@
 import React, { useEffect, useState } from 'react';
-import { Plus, Bot, MessageCircle, Activity, Settings, Key, Zap, Users, Clock, ArrowLeft, TrendingUp, Calendar, BarChart3 } from 'lucide-react';
+import { Plus, Bot, MessageCircle, Activity, Settings, Key, Zap, Users, Clock, ArrowLeft, TrendingUp, Calendar, BarChart3, FileText, Pause, Play, Trash2 } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
 import { Badge } from '../ui/Badge';
 import { Logo } from '../ui/Logo';
 import { ApiKeyModal } from '../ui/ApiKeyModal';
+import { AIConfigModal } from '../ui/AIConfigModal';
+import { DocumentManager } from '../ui/DocumentManager';
+import { DeleteConfirmModal } from '../ui/DeleteConfirmModal';
 import { useApp } from '../../context/AppContext';
 import { apiService } from '../../services/api';
 
 export function Dashboard() {
   const { state, dispatch } = useApp();
+  const [showAIConfig, setShowAIConfig] = useState(false);
+  const [showDocuments, setShowDocuments] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [selectedBot, setSelectedBot] = useState<any>(null);
+  const [deletingBot, setDeletingBot] = useState(false);
   const [stats, setStats] = useState({
     totalMessages: 0,
     activeBots: 0,
@@ -71,9 +79,114 @@ export function Dashboard() {
     }
   };
 
+  const handleStopBot = async (botId: string) => {
+    try {
+      await apiService.stopBot(botId);
+      dispatch({
+        type: 'UPDATE_BOT',
+        payload: {
+          id: botId,
+          updates: { status: 'offline', isConnected: false }
+        }
+      });
+    } catch (error) {
+      console.error('Error stopping bot:', error);
+    }
+  };
+
+  const handleStartBot = async (botId: string) => {
+    try {
+      await apiService.startBot(botId);
+      // Status will be updated via socket events
+    } catch (error) {
+      console.error('Error starting bot:', error);
+    }
+  };
+
+  const handleDeleteBot = (bot: any) => {
+    setSelectedBot(bot);
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDeleteBot = async () => {
+    if (!selectedBot) return;
+    
+    setDeletingBot(true);
+    try {
+      await apiService.deleteBot(selectedBot.id);
+      dispatch({ type: 'DELETE_BOT', payload: selectedBot.id });
+      setShowDeleteConfirm(false);
+      setSelectedBot(null);
+    } catch (error) {
+      console.error('Error deleting bot:', error);
+    } finally {
+      setDeletingBot(false);
+    }
+  };
+
+  const handleConfigureAI = (bot: any) => {
+    setSelectedBot(bot);
+    setShowAIConfig(true);
+  };
+
+  const handleSaveAIConfig = async (config: any) => {
+    if (!selectedBot) return;
+    
+    try {
+      const updatedBot = await apiService.updateBot(selectedBot.id, config);
+      dispatch({
+        type: 'UPDATE_BOT',
+        payload: {
+          id: selectedBot.id,
+          updates: config
+        }
+      });
+    } catch (error) {
+      console.error('Error updating AI config:', error);
+      throw error;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-black text-white">
       <ApiKeyModal />
+      
+      {selectedBot && (
+        <AIConfigModal
+          isOpen={showAIConfig}
+          onClose={() => {
+            setShowAIConfig(false);
+            setSelectedBot(null);
+          }}
+          botId={selectedBot.id}
+          currentConfig={{
+            temperature: selectedBot.temperature || 0.7,
+            model: selectedBot.model || 'gpt-3.5-turbo',
+            maxTokens: selectedBot.maxTokens || 500
+          }}
+          onSave={handleSaveAIConfig}
+        />
+      )}
+      
+      <DocumentManager
+        isOpen={showDocuments}
+        onClose={() => setShowDocuments(false)}
+      />
+      
+      {selectedBot && (
+        <DeleteConfirmModal
+          isOpen={showDeleteConfirm}
+          onClose={() => {
+            setShowDeleteConfirm(false);
+            setSelectedBot(null);
+          }}
+          onConfirm={confirmDeleteBot}
+          title="Deletar Bot"
+          message={`Tem certeza que deseja deletar o bot "${selectedBot.name}"?`}
+          itemName={selectedBot.name}
+          loading={deletingBot}
+        />
+      )}
       
       {/* Header */}
       <header className="border-b border-gray-900/50 backdrop-blur-sm bg-gray-950/50">
@@ -104,6 +217,13 @@ export function Dashboard() {
                   Configurar OpenAI
                 </Button>
               )}
+              <Button
+                variant="outline"
+                onClick={() => setShowDocuments(true)}
+                icon={FileText}
+              >
+                Base de Conhecimento
+              </Button>
               <Button
                 variant="ghost"
                 onClick={() => dispatch({ type: 'SET_SHOW_API_KEY_MODAL', payload: true })}
@@ -215,6 +335,13 @@ export function Dashboard() {
               icon={BarChart3}
             >
               Ver Estatísticas
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setShowDocuments(true)}
+              icon={FileText}
+            >
+              Base de Conhecimento
             </Button>
             {!state.user?.hasOpenAIKey && (
               <Button
@@ -367,6 +494,10 @@ export function Dashboard() {
                               {typeLabel}
                             </span>
                             <span className="flex items-center">
+                              <Zap className="w-4 h-4 mr-1" />
+                              {bot.model || 'gpt-3.5-turbo'}
+                            </span>
+                            <span className="flex items-center">
                               <MessageCircle className="w-4 h-4 mr-1" />
                               {bot.messagesCount} mensagens
                             </span>
@@ -390,6 +521,39 @@ export function Dashboard() {
                           )}
                         </div>
                         <div className="flex space-x-2">
+                          {/* Control Buttons */}
+                          {bot.status === 'online' ? (
+                            <Button
+                              variant="ghost"
+                              onClick={() => handleStopBot(bot.id)}
+                              className="hover:bg-red-500/10 hover:text-red-400"
+                              icon={Pause}
+                            >
+                              Parar
+                            </Button>
+                          ) : (
+                            <Button
+                              variant="ghost"
+                              onClick={() => handleStartBot(bot.id)}
+                              className="hover:bg-green-500/10 hover:text-green-400"
+                              icon={Play}
+                            >
+                              Iniciar
+                            </Button>
+                          )}
+                          
+                          {/* AI Config Button (only for AI bots) */}
+                          {bot.type === 'ai' && (
+                            <Button
+                              variant="ghost"
+                              onClick={() => handleConfigureAI(bot)}
+                              className="hover:bg-purple-500/10 hover:text-purple-400"
+                              icon={Settings}
+                            >
+                              IA
+                            </Button>
+                          )}
+                          
                           <Button
                             variant="ghost"
                             onClick={() => {
@@ -412,6 +576,16 @@ export function Dashboard() {
                               Testar
                             </Button>
                           )}
+                          
+                          {/* Delete Button */}
+                          <Button
+                            variant="ghost"
+                            onClick={() => handleDeleteBot(bot)}
+                            className="hover:bg-red-500/10 hover:text-red-400"
+                            icon={Trash2}
+                          >
+                            Deletar
+                          </Button>
                         </div>
                       </div>
                     </div>
@@ -436,7 +610,17 @@ export function Dashboard() {
                             )}
                           </p>
                         </div>
-                        {bot.flowData?.nodes && (
+                        <div className="ml-4 text-right">
+                          {bot.type === 'ai' ? (
+                            <div className="space-y-1">
+                              <div className="text-xs text-gray-500">
+                                Temp: {bot.temperature || 0.7}
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                Tokens: {bot.maxTokens || 500}
+                              </div>
+                            </div>
+                          ) : bot.flowData?.nodes && (
                           <div className="ml-4 text-right">
                             <div className="text-xs text-gray-500">
                               {bot.flowData.nodes.filter(n => n.type === 'condition').length} condições
@@ -445,7 +629,8 @@ export function Dashboard() {
                               {bot.flowData.nodes.filter(n => n.type === 'message').length} mensagens
                             </div>
                           </div>
-                        )}
+                          )}
+                        </div>
                       </div>
                     </div>
                   </Card>

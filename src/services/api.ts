@@ -214,6 +214,26 @@ class ApiService {
       const sessionId = this.getSessionId();
       const response = await fetch(`${this.baseUrl}/api/bots/${botId}`, {
         method: 'DELETE',
+        headers: this.getSessionHeaders(),
+      });
+      
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error);
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('Error deleting bot:', error);
+      throw error;
+    }
+  }
+
+  // Bot control
+  async stopBot(botId: string) {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/bots/${botId}/stop`, {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -226,7 +246,28 @@ class ApiService {
       
       return data;
     } catch (error) {
-      console.error('Error deleting bot:', error);
+      console.error('Error stopping bot:', error);
+      throw error;
+    }
+  }
+
+  async startBot(botId: string) {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/bots/${botId}/start`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error);
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('Error starting bot:', error);
       throw error;
     }
   }
@@ -246,6 +287,165 @@ class ApiService {
       return data;
     } catch (error) {
       console.error('Error fetching messages:', error);
+      throw error;
+    }
+  }
+
+  // Documents
+  async uploadDocument(file: File) {
+    try {
+      const sessionId = this.getSessionId();
+      const formData = new FormData();
+      formData.append('document', file);
+      formData.append('sessionId', sessionId);
+
+      const response = await fetch(`${this.baseUrl}/api/documents/upload`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error);
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Error uploading document:', error);
+      throw error;
+    }
+  }
+
+  async getDocuments() {
+    try {
+      const sessionId = this.getSessionId();
+      const response = await fetch(`${this.baseUrl}/api/documents?sessionId=${sessionId}`);
+      
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error);
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('Error fetching documents:', error);
+      throw error;
+    }
+  }
+
+  async deleteDocument(documentId: string) {
+    try {
+      const sessionId = this.getSessionId();
+      const response = await fetch(`${this.baseUrl}/api/documents/${documentId}?sessionId=${sessionId}`, {
+        method: 'DELETE',
+      });
+      
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error);
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('Error deleting document:', error);
+      throw error;
+    }
+  }
+
+  // AI Configuration
+  async getAIModels() {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/ai/models`);
+      
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error);
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('Error fetching AI models:', error);
+      throw error;
+    }
+  }
+
+  async validateOpenAIKey(apiKey: string) {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/ai/validate-key`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ apiKey }),
+      });
+      
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error);
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('Error validating API key:', error);
+      throw error;
+    }
+  }
+
+  async testAI(config: any) {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/ai/test`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(config),
+      });
+      
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error);
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('Error testing AI:', error);
+      throw error;
+    }
+  }
+
+  // Conversations
+  async getConversations(botId: string) {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/conversations/${botId}`, {
+        headers: this.getSessionHeaders(),
+      });
+      
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error);
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('Error fetching conversations:', error);
+      throw error;
+    }
+  }
+
+  async getConversationStats(botId: string) {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/conversations/${botId}/stats`, {
+        headers: this.getSessionHeaders(),
+      });
+      
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error);
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('Error fetching conversation stats:', error);
       throw error;
     }
   }

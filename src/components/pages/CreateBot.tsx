@@ -12,6 +12,9 @@ export function CreateBot() {
   const [name, setName] = useState('');
   const [botType, setBotType] = useState<'ai' | 'rules' | 'hybrid'>('ai');
   const [prompt, setPrompt] = useState('');
+  const [temperature, setTemperature] = useState(0.7);
+  const [model, setModel] = useState('gpt-3.5-turbo');
+  const [maxTokens, setMaxTokens] = useState(500);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -25,6 +28,9 @@ export function CreateBot() {
         name,
         type: botType,
         prompt: botType === 'ai' ? prompt : undefined,
+        temperature: botType === 'ai' ? temperature : 0.7,
+        model: botType === 'ai' ? model : 'gpt-3.5-turbo',
+        maxTokens: botType === 'ai' ? maxTokens : 500,
         flowData: botType !== 'ai' ? { nodes: [], connections: [] } : undefined
       };
 
@@ -199,7 +205,7 @@ export function CreateBot() {
 
             {/* AI Prompt (only for AI bots) */}
             {botType === 'ai' && (
-              <div>
+              <div className="space-y-6">
                 <Input
                   label="Prompt Personalizado"
                   type="textarea"
@@ -208,6 +214,59 @@ export function CreateBot() {
                   onChange={setPrompt}
                   required
                 />
+
+                {/* AI Configuration */}
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Modelo de IA
+                    </label>
+                    <select
+                      value={model}
+                      onChange={(e) => setModel(e.target.value)}
+                      className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-600"
+                    >
+                      <option value="gpt-3.5-turbo">GPT-3.5 Turbo (Rápido)</option>
+                      <option value="gpt-3.5-turbo-16k">GPT-3.5 Turbo 16K (Contexto longo)</option>
+                      <option value="gpt-4">GPT-4 (Mais inteligente)</option>
+                      <option value="gpt-4-turbo-preview">GPT-4 Turbo (Balanceado)</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Criatividade: {temperature}
+                    </label>
+                    <input
+                      type="range"
+                      min="0"
+                      max="2"
+                      step="0.1"
+                      value={temperature}
+                      onChange={(e) => setTemperature(parseFloat(e.target.value))}
+                      className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
+                    />
+                    <div className="flex justify-between text-xs text-gray-500 mt-1">
+                      <span>Conservador</span>
+                      <span>Criativo</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <Input
+                    label="Máximo de Tokens"
+                    value={maxTokens.toString()}
+                    onChange={(value) => {
+                      const num = parseInt(value) || 0;
+                      setMaxTokens(Math.min(Math.max(num, 50), 4000));
+                    }}
+                    placeholder="500"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Controla o tamanho das respostas (50-4000)
+                  </p>
+                </div>
 
                 <div className="mt-4 border-t border-gray-700 pt-4">
                   <h3 className="text-sm font-medium text-gray-300 mb-3">Exemplos de Prompts:</h3>

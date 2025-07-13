@@ -1,9 +1,25 @@
-# 🤖 Zaavy.ia - Plataforma de Bots WhatsApp com IA
+<p align="center">
+    <img src="./public/assets/bot (1).svg" width="200" alt="Bot Logo">
+</p>
 
+<div align="center">
 
+![Zaavy.ia Logo](https://img.shields.io/badge/Zaavy.ia-Bot%20Platform-blue?style=for-the-badge&logo=whatsapp&logoColor=white)
+
+[![Node.js](https://img.shields.io/badge/Node.js-18+-green?style=flat-square&logo=node.js)](https://nodejs.org/)
+[![React](https://img.shields.io/badge/React-18+-blue?style=flat-square&logo=react)](https://reactjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5+-blue?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
+[![Prisma](https://img.shields.io/badge/Prisma-5+-purple?style=flat-square&logo=prisma)](https://www.prisma.io/)
+[![OpenAI](https://img.shields.io/badge/OpenAI-GPT--3.5-orange?style=flat-square&logo=openai)](https://openai.com/)
+[![WhatsApp](https://img.shields.io/badge/WhatsApp-Web.js-green?style=flat-square&logo=whatsapp)](https://wwebjs.dev/)
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
+[![GitHub Stars](https://img.shields.io/github/stars/SantiaGhou/Zaavy.ia?style=flat-square)](https://github.com/SantiaGhou/Zaavy.ia/stargazers)
 
 **Uma plataforma completa para criar e gerenciar bots inteligentes no WhatsApp usando OpenAI GPT e whatsapp-web.js**
 
+  • [🐛 Reportar Bug](https://github.com/SantiaGhou/Zaavy.ia/issues) • [💡 Solicitar Feature](https://github.com/SantiaGhou/Zaavy.ia/issues) •
 
 </div>
 
@@ -28,29 +44,42 @@
 - **Sessões Isoladas**: Cada bot tem sua própria sessão
 - **Histórico Completo**: Todas as conversas são salvas
 - **Prompts Personalizados**: Configure o comportamento de cada bot
+- **Controle de Temperature**: Ajuste a criatividade das respostas
+- **Múltiplos Modelos**: GPT-3.5, GPT-4 e variações
+- **Base de Conhecimento**: Upload de PDFs para contexto
+- **Controle em Tempo Real**: Pare/inicie bots instantaneamente
+- **Sistema de Regras**: Fluxos personalizados com condições
 
 ---
 
-## 🛠️ Stack Tecnológica
+## 🛠️ Stacks Tecnológicas
 
 ### **Frontend**
-- ⚛️ **React 18** + TypeScript
-- 🎨 **Tailwind CSS** para estilização
-- 📡 **Socket.IO Client** para tempo real
-- 🎯 **Lucide React** para ícones
-- 🔄 **Context API** para gerenciamento de estado
+[![React 18](https://img.shields.io/badge/React-18-blue?style=flat-square&logo=react)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
+[![Tailwind CSS](https://img.shields.io/badge/TailwindCSS-3-blue?style=flat-square&logo=tailwindcss)](https://tailwindcss.com/)
+[![Lucide React](https://img.shields.io/badge/Lucide-React-blue?style=flat-square&logo=lucide)](https://lucide.dev/)
+[![Context API](https://img.shields.io/badge/Context-API-blue?style=flat-square&logo=react)](https://react.dev/reference/react/useContext)
+[![Socket.IO](https://img.shields.io/badge/Socket.IO-Client-black?style=flat-square&logo=socket.io)](https://socket.io/)
+[![React Dropzone](https://img.shields.io/badge/React-Dropzone-blue?style=flat-square&logo=react)](https://react-dropzone.js.org/)
+[![QRCode](https://img.shields.io/badge/QRCode-Generator-blue?style=flat-square&logo=qrcode)](https://www.npmjs.com/package/qrcode)
 
 ### **Backend**
-- 🚀 **Node.js** + Express
-- 📡 **Socket.IO** para comunicação em tempo real
-- 📱 **WhatsApp Web.js** para integração WhatsApp
-- 🤖 **OpenAI API** para inteligência artificial
+[![Node.js](https://img.shields.io/badge/Node.js-18-green?style=flat-square&logo=node.js)](https://nodejs.org/)
+[![Express](https://img.shields.io/badge/Express-4-black?style=flat-square&logo=express)](https://expressjs.com/)
+[![WhatsApp Web.js](https://img.shields.io/badge/WhatsApp-Web.js-green?style=flat-square&logo=whatsapp)](https://wwebjs.dev/)
+[![OpenAI](https://img.shields.io/badge/OpenAI-API-orange?style=flat-square&logo=openai)](https://openai.com/)
+[![Prisma](https://img.shields.io/badge/Prisma-ORM-purple?style=flat-square&logo=prisma)](https://www.prisma.io/)
+[![SQLite](https://img.shields.io/badge/SQLite-DB-blue?style=flat-square&logo=sqlite)](https://www.sqlite.org/)
+[![PDF Parse](https://img.shields.io/badge/PDF-Parse-blue?style=flat-square&logo=adobeacrobatreader)](https://www.npmjs.com/package/pdf-parse)
+[![Multer](https://img.shields.io/badge/Multer-Upload-yellow?style=flat-square&logo=multer)](https://www.npmjs.com/package/multer)
+[![Tiktoken](https://img.shields.io/badge/Tiktoken-Tokens-blue?style=flat-square&logo=openai)](https://github.com/openai/tiktoken)
+[![Socket.IO](https://img.shields.io/badge/Socket.IO-Server-black?style=flat-square&logo=socket.io)](https://socket.io/)
 
 ### **DevOps & Ferramentas**
-- 📦 **ES Modules** (ESM) em todo o projeto
-- 🔧 **Concurrently** para desenvolvimento
-- 🔄 **Nodemon** para hot reload
-- 📊 **QRCode** para geração de códigos
+[![ES Modules](https://img.shields.io/badge/ESM-Modules-blue?style=flat-square&logo=javascript)](https://nodejs.org/api/esm.html)
+[![Concurrently](https://img.shields.io/badge/Concurrently-Dev-blue?style=flat-square&logo=npm)](https://www.npmjs.com/package/concurrently)
+[![Nodemon](https://img.shields.io/badge/Nodemon-Hot%20Reload-green?style=flat-square&logo=nodemon)](https://nodemon.io/)
 
 ---
 
@@ -63,7 +92,7 @@
 
 ### **1. Clone o Repositório**
 ```bash
-git clone https://github.com/SantiaGhou/zaavy.ia.git
+git clone https://github.com/SantiaGhou/Zaavy.ia.git
 cd zaavy-ia
 ```
 
@@ -83,10 +112,20 @@ PORT=3001
 NODE_ENV=development
 FRONTEND_URL=http://localhost:5173
 
+# Database
+DATABASE_URL="file:./dev.db"
 ```
 
+### **4. Configure o Banco de Dados**
+```bash
+# Gerar cliente Prisma
+cd server && npx prisma generate
 
-### **4. Execute o Projeto**
+# Aplicar schema ao banco
+npx prisma db push
+```
+
+### **5. Execute o Projeto**
 ```bash
 # Executar frontend e backend simultaneamente
 npm run dev
@@ -132,6 +171,24 @@ npm run server        # Backend (porta 3001)
 
 ---
 
+## 🎨 Screenshots
+
+<div align="center">
+
+### 🏠 Landing Page
+![Landing Page](./public/assets/landing.png)
+
+### 📊 Dashboard
+![Dashboard](./public/assets/dashboard.png)
+
+### 🛠️ Construtor de Bots
+![Bot Builder](./public/assets/createBot.png)
+
+
+</div>
+
+---
+
 ## 🏗️ Arquitetura do Projeto
 
 ```
@@ -144,7 +201,13 @@ zaavy-ia/
 │   ├── 📁 services/                # Serviços e APIs
 │   └── 📁 types/                   # Tipos TypeScript
 ├── 📁 server/                      # Backend Node.js
-│   ├── idex.js                     # Servidor
+│   ├── 📁 config/                  # Configurações
+│   ├── 📁 controllers/             # Controladores
+│   ├── 📁 middleware/              # Middlewares
+│   ├── 📁 routes/                  # Rotas da API
+│   ├── 📁 services/                # Serviços do backend
+│   └── 📁 sockets/                 # Handlers Socket.IO
+├── 📁 prisma/                      # Schema do banco
 └── 📄 package.json                 # Dependências
 ```
 
@@ -156,11 +219,17 @@ zaavy-ia/
 # Desenvolvimento
 npm run dev              # Frontend + Backend
 npm run dev:frontend     # Apenas frontend
-npm run server          # Apenas backend
-"
+npm run server           # Apenas backend
+
+# Banco de Dados
+npm run db:generate      # Gerar cliente Prisma
+npm run db:push          # Aplicar schema
+npm run db:studio        # Interface visual do banco
+npm run db:reset         # Resetar banco
+
 # Produção
-npm run build           # Build para produção
-npm run preview         # Preview do build
+npm run build            # Build para produção
+npm run preview          # Preview do build
 ```
 
 ---
@@ -171,7 +240,7 @@ Contribuições são sempre bem-vindas! Veja como você pode ajudar:
 
 ### **1. 🍴 Fork o Projeto**
 ```bash
-git clone https://github.com/SantiaGhou/zaavy.ia.git
+git clone https://github.com/SantiaGhou/Zaavy.ia.git
 ```
 
 ### **2. 🌿 Crie uma Branch**
@@ -212,33 +281,27 @@ git push origin feature/nova-funcionalidade
 - [ ] Docker support
 - [ ] CI/CD pipeline
 
----
-
-## 🔒 Segurança
-
-- 🔐 **Sessões isoladas** por usuário
-- 🛡️ **API Keys protegidas** e criptografadas
-- ✅ **Validação de entrada** em todas as rotas
-- 🔒 **Dados locais** não compartilhados
-- 🚫 **Sem coleta** de dados pessoais
 
 ---
 
 ## 📊 Status do Projeto
 
-![GitHub last commit](https://img.shields.io/github/last-commit/SantiaGhou/zaavy.ia?style=flat-square)
-![GitHub issues](https://img.shields.io/github/issues/SantiaGhou/zaavy.ia?style=flat-square)
+![GitHub last commit](https://img.shields.io/github/last-commit/SantiaGhou/Zaavy.ia?style=flat-square)
+![GitHub issues](https://img.shields.io/github/issues/SantiaGhou/Zaavy.ia?style=flat-square)
+![GitHub pull requests](https://img.shields.io/github/issues-pr/SantiaGhou/Zaavy.ia?style=flat-square)
+
 ---
 
 ## 👨‍💻 Autor
 
 <div align="center">
 
+<img src="https://avatars.githubusercontent.com/u/161606315?v=4" alt="SantiaGhou Profile" width="120" style="border-radius: 50%;" />
+
 **Desenvolvido com ❤️ por [SantiaGhou](https://github.com/SantiaGhou)**
 
 [![GitHub](https://img.shields.io/badge/GitHub-SantiaGhou-black?style=flat-square&logo=github)](https://github.com/SantiaGhou)
-
-
+[![Repository](https://img.shields.io/badge/Repository-Zaavy.ia-blue?style=flat-square&logo=github)](https://github.com/SantiaGhou/Zaavy.ia)
 </div>
 
 ---
@@ -248,14 +311,9 @@ git push origin feature/nova-funcionalidade
 Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
 
 ---
+# Contato
+Se você tiver alguma dúvida ou sugestão, entre em contato comigo através do meu [LinkedIn](https://www.linkedin.com/in/filipe-santiago-0736932b2/).
 
-## 🙏 Agradecimentos
-
-- 🤖 **OpenAI** pela API GPT incrível
-- 📱 **WhatsApp Web.js** pela integração perfeita
-- ⚛️ **React Team** pelo framework fantástico
-- 🎨 **Tailwind CSS** pelo design system
-- 🗄️ **Prisma** pelo ORM moderno
 
 ---
 
@@ -263,6 +321,6 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para ma
 
 **⭐ Se este projeto te ajudou, considere dar uma estrela!**
 
-[![GitHub stars](https://img.shields.io/github/stars/SantiaGhou/zaavy.ia?style=social)](https://github.com/SantiaGhou/zaavy.ia/stargazers)
+[![GitHub stars](https://img.shields.io/github/stars/SantiaGhou/Zaavy.ia?style=social)](https://github.com/SantiaGhou/Zaavy.ia/stargazers)
 
 </div>
