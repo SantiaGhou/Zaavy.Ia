@@ -138,14 +138,12 @@ export function ApiKeyModal() {
 
             <div className="flex space-x-3">
               <Button
-                type="submit"
                 disabled={!apiKey.trim() || loading || success}
                 className="flex-1"
               >
                 {loading ? 'Salvando...' : success ? 'Salvo!' : 'Salvar Chave'}
               </Button>
               <Button
-                type="button"
                 variant="outline"
                 onClick={handleClose}
                 disabled={loading}

@@ -7,7 +7,7 @@ generator client {
 
 datasource db {
   provider = "sqlite"
-  url      = env("DATABASE_URL") // Use environment variable
+  url      = "file:./dev.db"
 }
 
 model User {
@@ -26,8 +26,8 @@ model User {
 model Bot {
   id            String   @id @default(cuid())
   name          String
-  prompt        String?  @default("Você é um assistente útil e amigável.")
-  type          String   @default("ai") // 'ai', 'rules', 'hybrid'
+  prompt        String?
+  type          String   // 'ai', 'rules', 'hybrid'
   status        String   @default("offline") // 'online', 'offline', 'connecting'
   isConnected   Boolean  @default(false)
   messagesCount Int      @default(0)
@@ -48,32 +48,32 @@ model Bot {
   // Relations
   userId        String
   user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
   conversations Conversation[]
   messages      Message[]
   
-  @@index([userId])
   @@map("bots")
 }
 
 model Conversation {
-  id            String    @id @default(cuid())
+  id            String   @id @default(cuid())
   phoneNumber   String
   userName      String?
-  isActive      Boolean   @default(true)
-  context       String?   // Compressed conversation context
+  isActive      Boolean  @default(true)
+  context       String?  // Compressed conversation context
   
   // Timestamps
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
   lastMessage   DateTime?
   
   // Relations
   botId         String
-  bot           Bot       @relation(fields: [botId], references: [id], onDelete: Cascade)
+  bot           Bot      @relation(fields: [botId], references: [id], onDelete: Cascade)
+  
   messages      Message[]
   
   @@unique([botId, phoneNumber])
-  @@index([botId])
   @@map("conversations")
 }
 
@@ -95,36 +95,34 @@ model Message {
   // Relations
   botId           String
   bot             Bot      @relation(fields: [botId], references: [id], onDelete: Cascade)
+  
   conversationId  String
   conversation    Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   
-  @@index([botId])
-  @@index([conversationId])
   @@map("messages")
 }
 
 model Document {
-  id            String   @id @default(cuid())
-  filename      String
-  originalName  String
-  mimeType      String
-  size          Int
-  content       String   // Extracted text content
-  chunks        String   // JSON array of text chunks
-  embeddings    String?  // JSON array of embeddings (optional)
+  id          String   @id @default(cuid())
+  filename    String
+  originalName String
+  mimeType    String
+  size        Int
+  content     String   // Extracted text content
+  chunks      String   // JSON array of text chunks
+  embeddings  String?  // JSON array of embeddings (optional)
   
   // Metadata
-  pageCount     Int?
-  language      String?
+  pageCount   Int?
+  language    String?
   
   // Timestamps
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
   
   // Relations
-  userId        String
-  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   
-  @@index([userId])
   @@map("documents")
 }

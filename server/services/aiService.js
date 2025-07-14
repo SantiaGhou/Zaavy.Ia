@@ -1,6 +1,8 @@
 import OpenAI from 'openai';
 import { encoding_for_model } from 'tiktoken';
 
+const encode = encoding_for_model('gpt-3.5-turbo');
+
 class AIService {
   constructor() {
     this.openaiInstances = new Map();
@@ -49,12 +51,8 @@ class AIService {
 
   countTokens(text) {
     try {
-      const encoder = encoding_for_model('gpt-3.5-turbo');
-      const tokens = encoder.encode(text);
-      encoder.free(); // Libera a memória do encoder
-      return tokens.length;
+      return encode(text).length;
     } catch (error) {
-      // Fallback: rough estimation
       return Math.ceil(text.length / 4);
     }
   }
@@ -66,7 +64,8 @@ class AIService {
       model = 'gpt-3.5-turbo',
       temperature = 0.7,
       maxTokens = 500,
-      conversationHistory = []
+      conversationHistory = [],
+      documents = []
     } = config;
 
     if (!apiKey) {
@@ -76,15 +75,19 @@ class AIService {
     try {
       const openai = this.getOrCreateOpenAI(apiKey);
 
-      // Build conversation history
+      let documentContext = '';
+      if (documents.length > 0) {
+        documentContext = '\n\nBase de conhecimento:\n' + 
+          documents.map(doc => doc.content).join('\n\n');
+      }
+
       const messages = [
         {
           role: "system",
-          content: prompt
+          content: prompt + documentContext
         }
       ];
 
-      // Add conversation history (last 10 messages to manage token limit)
       const recentHistory = conversationHistory.slice(-10);
       recentHistory.forEach(msg => {
         messages.push({
@@ -93,13 +96,11 @@ class AIService {
         });
       });
 
-      // Add current user message
       messages.push({
         role: "user",
         content: userMessage
       });
 
-      // Count tokens to ensure we don't exceed limits
       const totalTokens = messages.reduce((sum, msg) => 
         sum + this.countTokens(msg.content), 0
       );
@@ -108,9 +109,8 @@ class AIService {
       const maxContextTokens = modelInfo ? modelInfo.maxTokens - maxTokens : 4096 - maxTokens;
 
       if (totalTokens > maxContextTokens) {
-        // Trim conversation history if too long
         while (messages.length > 2 && totalTokens > maxContextTokens) {
-          messages.splice(1, 1); // Remove oldest conversation message (keep system + user)
+          messages.splice(1, 1);
         }
       }
 
@@ -118,14 +118,12 @@ class AIService {
         model,
         messages,
         max_tokens: maxTokens,
-        temperature: Math.max(0, Math.min(2, temperature)), // Clamp between 0-2
+        temperature: Math.max(0, Math.min(2, temperature)),
         presence_penalty: 0.1,
         frequency_penalty: 0.1
       });
 
-      const response = completion.choices && completion.choices[0] && completion.choices[0].message
-        ? completion.choices[0].message.content
-        : '';
+      const response = completion.choices[0].message.content;
       const tokensUsed = completion.usage?.total_tokens || 0;
 
       return {

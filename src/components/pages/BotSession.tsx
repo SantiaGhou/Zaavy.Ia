@@ -5,6 +5,7 @@ import { Card } from '../ui/Card';
 import { Badge } from '../ui/Badge';
 import { Logo } from '../ui/Logo';
 import { QRCodeDisplay } from '../ui/QRCodeDisplay';
+import { LoadingBot } from '../ui/LoadingBot';
 import { useApp } from '../../context/AppContext';
 import { apiService } from '../../services/api';
 
@@ -18,7 +19,6 @@ export function BotSession() {
   const currentBot = state.bots.find(bot => bot.id === state.currentBotId);
   const botMessages = state.messages.filter(msg => msg.botId === state.currentBotId);
 
-  // Load messages from database
   useEffect(() => {
     const loadMessages = async () => {
       if (state.currentBotId) {
@@ -46,7 +46,6 @@ export function BotSession() {
   useEffect(() => {
     const socket = apiService.connect();
     
-    // Listen for authentication success
     socket.on('authenticated', (data) => {
       if (data.success) {
         console.log('✅ Socket authenticated successfully');
@@ -114,7 +113,6 @@ export function BotSession() {
       if (data.botId === state.currentBotId) {
         setLoading(false);
         setIsConnecting(false);
-        // You can add error state handling here if needed
       }
     });
 
@@ -149,7 +147,6 @@ export function BotSession() {
   }, [currentBot]);
 
   const handleConnect = () => {
-    // Real connection is handled by socket events
     console.log('Connection will be handled automatically via QR code scan');
   };
 
@@ -169,7 +166,6 @@ export function BotSession() {
 
     dispatch({ type: 'ADD_MESSAGE', payload: userMessage });
     
-    // Simulate bot response
     setTimeout(() => {
       const botResponse = {
         id: (Date.now() + 1).toString(),
@@ -206,9 +202,17 @@ export function BotSession() {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <LoadingBot message="Conectando bot..." size="lg" />
+      </div>
+    );
+  }
+
   if (!currentBot) {
     return (
-      <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
         <div className="text-center">
           <Bot className="w-16 h-16 text-gray-600 mx-auto mb-4" />
           <h2 className="text-xl font-medium mb-2">Bot não encontrado</h2>
@@ -225,7 +229,6 @@ export function BotSession() {
 
   return (
       <div className="min-h-screen bg-black text-white">
-      {/* Header */}
       <header className="border-b border-gray-900">
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
@@ -256,7 +259,6 @@ export function BotSession() {
       </header>
 
       <div className="container mx-auto px-4 py-8">
-        {/* Bot Info */}
         <div className="mb-8">
           <div className="flex items-center space-x-4 mb-4">
             <Bot className="w-12 h-12 text-blue-500" />
@@ -275,7 +277,6 @@ export function BotSession() {
         </div>
 
         <div className="grid lg:grid-cols-2 gap-8">
-          {/* Connection Status */}
           <div>
             <h2 className="text-xl font-semibold mb-4">Status da Conexão</h2>
             
@@ -311,12 +312,10 @@ export function BotSession() {
             />
           </div>
 
-          {/* Messages */}
           <div>
             <h2 className="text-xl font-semibold mb-4">Mensagens</h2>
             
             <Card className="p-4 h-96 flex flex-col bg-gray-900/50 backdrop-blur-sm border-gray-800">
-              {/* Messages List */}
               <div className="flex-1 overflow-y-auto mb-4 space-y-3">
                 {loading ? (
                   <div className="text-center text-gray-400 py-8">
@@ -351,7 +350,6 @@ export function BotSession() {
                 )}
               </div>
 
-              {/* Send Message */}
               {currentBot.isConnected && (
                 <form onSubmit={handleSendMessage} className="flex space-x-2">
                   <input

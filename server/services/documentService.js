@@ -1,27 +1,19 @@
 import fs from 'fs/promises';
 import path from 'path';
 import pdf from 'pdf-parse';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { prisma } from '../lib/prisma.js';
 
 class DocumentService {
   constructor() {
     this.uploadDir = path.join(process.cwd(), 'uploads');
-    this.testDataDir = path.join(process.cwd(), 'test', 'data');
-    this.ensureDirs();
+    this.ensureUploadDir();
   }
 
-  async ensureDirs() {
+  async ensureUploadDir() {
     try {
       await fs.access(this.uploadDir);
     } catch {
       await fs.mkdir(this.uploadDir, { recursive: true });
-    }
-    try {
-      await fs.access(this.testDataDir);
-    } catch {
-      await fs.mkdir(this.testDataDir, { recursive: true });
     }
   }
 
@@ -44,39 +36,33 @@ class DocumentService {
       // Save file
       await fs.writeFile(filepath, file.buffer);
 
-      try {
-        // Extract text from PDF
-        const pdfData = await pdf(file.buffer);
-        const content = pdfData.text;
+      // Extract text from PDF
+      const pdfData = await pdf(file.buffer);
+      const content = pdfData.text;
 
-        if (!content || content.trim().length === 0) {
-          await fs.unlink(filepath); // Clean up file
-          throw new Error('Não foi possível extrair texto do PDF');
-        }
-
-        // Create text chunks for better processing
-        const chunks = this.createTextChunks(content);
-
-        // Save to database
-        const document = await prisma.document.create({
-          data: {
-            filename,
-            originalName: file.originalname,
-            mimeType: file.mimetype,
-            size: file.size,
-            content,
-            chunks: JSON.stringify(chunks),
-            pageCount: pdfData.numpages,
-            userId
-          }
-        });
-
-        return document;
-      } catch (error) {
-        // Clean up file if PDF processing fails
-        await fs.unlink(filepath);
-        throw error;
+      if (!content || content.trim().length === 0) {
+        await fs.unlink(filepath); // Clean up file
+        throw new Error('Não foi possível extrair texto do PDF');
       }
+
+      // Create text chunks for better processing
+      const chunks = this.createTextChunks(content);
+
+      // Save to database
+      const document = await prisma.document.create({
+        data: {
+          filename,
+          originalName: file.originalname,
+          mimeType: file.mimetype,
+          size: file.size,
+          content,
+          chunks: JSON.stringify(chunks),
+          pageCount: pdfData.numpages,
+          userId
+        }
+      });
+
+      return document;
     } catch (error) {
       console.error('Error uploading document:', error);
       throw error;
@@ -152,6 +138,20 @@ class DocumentService {
 
   async getDocument(documentId, userId) {
     try {
+      return await prisma.document.findFirst({
+        where: { 
+          id: documentId,
+          userId 
+        }
+      });
+    } catch (error) {
+      console.error('Error fetching document:', error);
+      throw error;
+    }
+  }
+
+  async deleteDocument(documentId, userId) {
+    try {
       const document = await prisma.document.findFirst({
         where: { 
           id: documentId,
@@ -162,17 +162,6 @@ class DocumentService {
       if (!document) {
         throw new Error('Documento não encontrado');
       }
-
-      return document;
-    } catch (error) {
-      console.error('Error fetching document:', error);
-      throw error;
-    }
-  }
-
-  async deleteDocument(documentId, userId) {
-    try {
-      const document = await this.getDocument(documentId, userId);
 
       // Delete file from filesystem
       const filepath = path.join(this.uploadDir, document.filename);

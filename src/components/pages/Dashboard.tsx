@@ -6,44 +6,52 @@ import { Badge } from '../ui/Badge';
 import { Logo } from '../ui/Logo';
 import { ApiKeyModal } from '../ui/ApiKeyModal';
 import { AIConfigModal } from '../ui/AIConfigModal';
-import { DocumentManager } from '../ui/DocumentManager';
 import { DeleteConfirmModal } from '../ui/DeleteConfirmModal';
+import { LoadingBot } from '../ui/LoadingBot';
 import { useApp } from '../../context/AppContext';
 import { apiService } from '../../services/api';
+
+interface Stats {
+  totalMessages: number;
+  activeBots: number;
+  todayMessages: number;
+  avgResponseTime: string;
+}
 
 export function Dashboard() {
   const { state, dispatch } = useApp();
   const [showAIConfig, setShowAIConfig] = useState(false);
-  const [showDocuments, setShowDocuments] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [selectedBot, setSelectedBot] = useState<any>(null);
   const [deletingBot, setDeletingBot] = useState(false);
-  const [stats, setStats] = useState({
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState<Stats>({
     totalMessages: 0,
     activeBots: 0,
     todayMessages: 0,
     avgResponseTime: '2.3s'
   });
 
-  // Load bots on dashboard mount
   useEffect(() => {
     const loadBots = async () => {
       try {
+        setLoading(true);
         const bots = await apiService.getBots();
         dispatch({ type: 'SET_BOTS', payload: bots });
         
-        // Calculate stats
-        const totalMessages = bots.reduce((sum, bot) => sum + bot.messagesCount, 0);
-        const activeBots = bots.filter(bot => bot.status === 'online').length;
+        const totalMessages = bots.reduce((sum: number, bot: { messagesCount: number }) => sum + bot.messagesCount, 0);
+        const activeBots = bots.filter((bot: { status: string }) => bot.status === 'online').length;
         
         setStats({
           totalMessages,
           activeBots,
-          todayMessages: Math.floor(totalMessages * 0.3), // Simulate today's messages
+          todayMessages: Math.floor(totalMessages * 0.3),
           avgResponseTime: '2.3s'
         });
       } catch (error) {
         console.error('Error loading bots:', error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -147,6 +155,14 @@ export function Dashboard() {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <LoadingBot message="Carregando dashboard..." size="lg" />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-black text-white">
       <ApiKeyModal />
@@ -168,11 +184,6 @@ export function Dashboard() {
         />
       )}
       
-      <DocumentManager
-        isOpen={showDocuments}
-        onClose={() => setShowDocuments(false)}
-      />
-      
       {selectedBot && (
         <DeleteConfirmModal
           isOpen={showDeleteConfirm}
@@ -188,7 +199,6 @@ export function Dashboard() {
         />
       )}
       
-      {/* Header */}
       <header className="border-b border-gray-900/50 backdrop-blur-sm bg-gray-950/50">
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
@@ -218,13 +228,6 @@ export function Dashboard() {
                 </Button>
               )}
               <Button
-                variant="outline"
-                onClick={() => setShowDocuments(true)}
-                icon={FileText}
-              >
-                Base de Conhecimento
-              </Button>
-              <Button
                 variant="ghost"
                 onClick={() => dispatch({ type: 'SET_SHOW_API_KEY_MODAL', payload: true })}
                 icon={Settings}
@@ -237,7 +240,6 @@ export function Dashboard() {
       </header>
 
       <div className="container mx-auto px-4 py-8">
-        {/* Welcome Section */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
             Bem-vindo ao Zaavy.ia
@@ -247,7 +249,6 @@ export function Dashboard() {
           </p>
         </div>
 
-        {/* Stats Cards */}
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <Card className="p-6 bg-gradient-to-br from-blue-500/10 to-blue-600/5 border-blue-500/20 hover:border-blue-500/40 transition-all duration-300 group">
             <div className="flex items-center justify-between">
@@ -318,7 +319,6 @@ export function Dashboard() {
           </Card>
         </div>
 
-        {/* Quick Actions */}
         <div className="mb-8">
           <h2 className="text-xl font-semibold mb-4">Ações Rápidas</h2>
           <div className="flex flex-wrap gap-4">
@@ -336,13 +336,6 @@ export function Dashboard() {
             >
               Ver Estatísticas
             </Button>
-            <Button
-              variant="outline"
-              onClick={() => setShowDocuments(true)}
-              icon={FileText}
-            >
-              Base de Conhecimento
-            </Button>
             {!state.user?.hasOpenAIKey && (
               <Button
                 variant="outline"
@@ -356,7 +349,6 @@ export function Dashboard() {
           </div>
         </div>
 
-        {/* Performance Metrics */}
         {state.bots.length > 0 && (
           <div className="grid md:grid-cols-3 gap-6 mb-8">
             <Card className="p-6 bg-gray-900/50 backdrop-blur-sm border-gray-800">
@@ -430,7 +422,6 @@ export function Dashboard() {
           </div>
         )}
 
-        {/* Bots List */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-semibold">Seus Bots ({state.bots.length})</h2>
@@ -521,7 +512,6 @@ export function Dashboard() {
                           )}
                         </div>
                         <div className="flex space-x-2">
-                          {/* Control Buttons */}
                           {bot.status === 'online' ? (
                             <Button
                               variant="ghost"
@@ -542,7 +532,6 @@ export function Dashboard() {
                             </Button>
                           )}
                           
-                          {/* AI Config Button (only for AI bots) */}
                           {bot.type === 'ai' && (
                             <Button
                               variant="ghost"
@@ -577,7 +566,6 @@ export function Dashboard() {
                             </Button>
                           )}
                           
-                          {/* Delete Button */}
                           <Button
                             variant="ghost"
                             onClick={() => handleDeleteBot(bot)}
@@ -590,7 +578,6 @@ export function Dashboard() {
                       </div>
                     </div>
                     
-                    {/* Bot preview */}
                     <div className="mt-4 p-4 bg-gray-800/50 rounded-lg border border-gray-700/50">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">

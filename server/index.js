@@ -7,18 +7,17 @@ const { Client, LocalAuth } = pkg;
 import qrcode from 'qrcode';
 import OpenAI from 'openai';
 import dotenv from 'dotenv';
-import { PrismaClient } from '@prisma/client';
 import aiRouter from './routes/ai.js';
 import { aiService } from './services/aiService.js';
 import { conversationService } from './services/conversationService.js';
+import { prisma } from './lib/prisma.js';
 
-// Load environment variables
-dotenv.config();
+try {
+  dotenv.config();
+} catch (error) {
+  console.warn('Warning: .env file not found, using default values');
+}
 
-// Initialize Prisma
-const prisma = new PrismaClient();
-
-// Initialize Express app
 const app = express();
 const server = createServer(app);
 
@@ -39,7 +38,6 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// API Routes
 app.use('/api/ai', aiRouter);
 
 // In-memory storage
@@ -108,11 +106,11 @@ app.post('/api/session/initialize', (req, res) => {
     }).catch(error => {
       console.error('Database error:', error);
       res.json({
-        sessionId: session.sessionId,
-        hasOpenAIKey: !!session.openaiKey,
-        botsCount: 0,
-        createdAt: session.createdAt
-      });
+      sessionId: session.sessionId,
+      hasOpenAIKey: !!session.openaiKey,
+      botsCount: 0,
+      createdAt: session.createdAt
+    });
     });
   } catch (error) {
     console.error('Error initializing session:', error);
@@ -641,6 +639,7 @@ io.on('connection', (socket) => {
 // Message handling functions
 async function handleMessage(message, bot, socket) {
   try {
+
     // Check if bot is stopped
     const botState = botStates.get(bot.id);
     if (botState?.stopped) {
@@ -728,9 +727,11 @@ async function generateAIResponse(userMessage, bot, conversation) {
       throw new Error("Chave da OpenAI não configurada.");
     }
 
+
     // Get conversation history
     const conversationHistory = conversation.messages || [];
     
+    // Search for relevant documents
     const result = await aiService.generateResponse(userMessage, {
       apiKey: bot.user.openaiKey,
       prompt: bot.prompt || "Você é um assistente útil e amigável.",

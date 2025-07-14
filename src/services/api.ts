@@ -291,68 +291,6 @@ class ApiService {
     }
   }
 
-  // Documents
-  async uploadDocument(file: File) {
-    try {
-      const sessionId = this.getSessionId();
-      const formData = new FormData();
-      formData.append('document', file);
-      formData.append('sessionId', sessionId);
-
-      const response = await fetch(`${this.baseUrl}/api/documents/upload`, {
-        method: 'POST',
-        body: formData,
-      });
-
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.error);
-      }
-
-      return data;
-    } catch (error) {
-      console.error('Error uploading document:', error);
-      throw error;
-    }
-  }
-
-  async getDocuments() {
-    try {
-      const sessionId = this.getSessionId();
-      const response = await fetch(`${this.baseUrl}/api/documents?sessionId=${sessionId}`);
-      
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.error);
-      }
-      
-      return data;
-    } catch (error) {
-      console.error('Error fetching documents:', error);
-      throw error;
-    }
-  }
-
-  async deleteDocument(documentId: string) {
-    try {
-      const sessionId = this.getSessionId();
-      const response = await fetch(`${this.baseUrl}/api/documents/${documentId}?sessionId=${sessionId}`, {
-        method: 'DELETE',
-      });
-      
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.error);
-      }
-      
-      return data;
-    } catch (error) {
-      console.error('Error deleting document:', error);
-      throw error;
-    }
-  }
-
-  // AI Configuration
   async getAIModels() {
     try {
       const response = await fetch(`${this.baseUrl}/api/ai/models`);
@@ -413,7 +351,6 @@ class ApiService {
     }
   }
 
-  // Conversations
   async getConversations(botId: string) {
     try {
       const response = await fetch(`${this.baseUrl}/api/conversations/${botId}`, {
@@ -450,7 +387,6 @@ class ApiService {
     }
   }
 
-  // Health check
   async checkHealth() {
     try {
       const response = await fetch(`${this.baseUrl}/api/health`);
@@ -461,7 +397,6 @@ class ApiService {
     }
   }
 
-  // Initialize session
   async initializeSession() {
     const sessionId = this.getSessionId();
     
@@ -491,7 +426,6 @@ class ApiService {
     }
   }
 
-  // Clear session
   clearSession() {
     this.setSessionId(null);
     this.disconnect();
