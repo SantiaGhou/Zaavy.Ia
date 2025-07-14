@@ -2,23 +2,29 @@ import express from 'express';
 import cors from 'cors';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
-import pkg from 'whatsapp-web.js';
-const { Client, LocalAuth } = pkg;
+
+import whatsappPkg from 'whatsapp-web.js';
+const { Client, LocalAuth } = whatsappPkg;
+
 import qrcode from 'qrcode';
 import OpenAI from 'openai';
 import dotenv from 'dotenv';
-import { PrismaClient } from '@prisma/client';
+
+import prismaPkg from '@prisma/client';
+const { PrismaClient } = prismaPkg;
+
 import aiRouter from './routes/ai.js';
 import { aiService } from './services/aiService.js';
 import { conversationService } from './services/conversationService.js';
 
-// Load environment variables
+
+const { PrismaClient } = pkg;
+
 dotenv.config();
 
-// Initialize Prisma
 const prisma = new PrismaClient();
 
-// Initialize Express app
+
 const app = express();
 const server = createServer(app);
 
