@@ -1,29 +1,30 @@
 export interface Bot {
   id: string;
   name: string;
+  description?: string;
   prompt?: string;
-  type: 'ai' | 'rules' | 'hybrid';
+  type: 'rule-based' | 'ai' | 'hybrid';
+  status: 'active' | 'inactive' | 'draft' | 'online' | 'offline' | 'connecting';
   flowData?: FlowData;
-  status: 'online' | 'offline' | 'connecting';
-  messagesCount: number;
-  createdAt: Date;
+  settings?: BotSettings;
+  messagesCount?: number;
+  createdAt: Date | string;
+  updatedAt?: Date | string;
   lastActivity?: Date;
   sessionId?: string;
-  isConnected: boolean;
-  
+  isConnected?: boolean;
   // AI Configuration
-  temperature: number;
-  model: string;
-  maxTokens: number;
-  
+  temperature?: number;
+  model?: string;
+  maxTokens?: number;
   // Database fields
-  updatedAt?: Date;
   userId?: string;
 }
 
 export interface FlowData {
   nodes: FlowNode[];
-  connections: FlowConnection[];
+  edges: FlowEdge[];
+  connections?: FlowConnection[];
 }
 
 export interface FlowNode {
@@ -36,6 +37,33 @@ export interface FlowNode {
     conditions?: Condition[];
     aiPrompt?: string;
     responses?: string[];
+    triggerType?: 'message' | 'keyword' | 'time' | 'event';
+    keywords?: string[];
+    timeCondition?: {
+      start: string;
+      end: string;
+      days: string[];
+    };
+    actionType?: 'forward' | 'webhook' | 'delay' | 'tag';
+    actionConfig?: any;
+    validation?: {
+      isValid: boolean;
+      errors: string[];
+    };
+  };
+}
+
+export interface FlowEdge {
+  id: string;
+  source: string;
+  target: string;
+  sourceHandle?: string;
+  targetHandle?: string;
+  type?: 'default' | 'smoothstep' | 'step';
+  animated?: boolean;
+  label?: string;
+  data?: {
+    condition?: 'true' | 'false' | 'default';
   };
 }
 
@@ -48,10 +76,28 @@ export interface FlowConnection {
 
 export interface Condition {
   id: string;
-  type: 'contains' | 'equals' | 'starts_with' | 'ends_with';
+  type: 'contains' | 'equals' | 'starts_with' | 'ends_with' | 'regex';
   value: string;
   response: string;
-  nextNode?: string;
+  nextNodeId?: string;
+}
+
+export interface BotSettings {
+  welcomeMessage?: string;
+  fallbackMessage?: string;
+  workingHours?: {
+    enabled: boolean;
+    start: string;
+    end: string;
+    days: string[];
+    outsideHoursMessage: string;
+  };
+  aiSettings?: {
+    model: string;
+    temperature: number;
+    maxTokens: number;
+    systemPrompt: string;
+  };
 }
 
 export interface Message {
@@ -62,12 +108,10 @@ export interface Message {
   timestamp: Date;
   phoneNumber?: string;
   userName?: string;
-  
   // AI Metadata
   tokensUsed?: number;
   model?: string;
   temperature?: number;
-  
   // Database relations
   conversationId?: string;
 }
@@ -133,3 +177,22 @@ export interface BotState {
   stopped?: boolean;
   processing?: boolean;
 }
+
+export interface AppState {
+  currentPage: 'dashboard' | 'bot-builder' | 'bot-session' | 'settings';
+  currentBotId: string | null;
+  bots: Bot[];
+  user: {
+    name: string;
+    email: string;
+    plan: 'free' | 'pro' | 'enterprise';
+  };
+}
+
+export type AppAction =
+  | { type: 'SET_CURRENT_PAGE'; payload: AppState['currentPage'] }
+  | { type: 'SET_CURRENT_BOT'; payload: string | null }
+  | { type: 'ADD_BOT'; payload: Bot }
+  | { type: 'UPDATE_BOT'; payload: { id: string; updates: Partial<Bot> } }
+  | { type: 'DELETE_BOT'; payload: string }
+  | { type: 'SET_BOTS'; payload: Bot[] };

@@ -1,5 +1,5 @@
 import React from 'react';
-import { getBezierPath, EdgeProps } from 'reactflow';
+import { EdgeProps, getBezierPath, EdgeLabelRenderer } from 'reactflow';
 
 export function ConnectionLine({
   id,
@@ -13,7 +13,7 @@ export function ConnectionLine({
   data,
   markerEnd,
 }: EdgeProps) {
-  const [edgePath] = getBezierPath({
+  const [edgePath, labelX, labelY] = getBezierPath({
     sourceX,
     sourceY,
     sourcePosition,
@@ -22,28 +22,46 @@ export function ConnectionLine({
     targetPosition,
   });
 
+  const getEdgeColor = () => {
+    if (data?.condition === 'true') return '#10b981'; // green
+    if (data?.condition === 'false') return '#ef4444'; // red
+    return '#6b7280'; // gray
+  };
+
+  const getEdgeLabel = () => {
+    if (data?.condition === 'true') return 'Sim';
+    if (data?.condition === 'false') return 'Não';
+    return data?.label || '';
+  };
+
   return (
     <>
       <path
         id={id}
-        style={style}
-        className="react-flow__edge-path stroke-2 stroke-blue-400/60 hover:stroke-blue-400"
+        style={{
+          ...style,
+          stroke: getEdgeColor(),
+          strokeWidth: 2,
+        }}
+        className="react-flow__edge-path"
         d={edgePath}
         markerEnd={markerEnd}
       />
-      {data?.label && (
-        <text>
-          <textPath
-            href={`#${id}`}
-            style={{ fontSize: 12 }}
-            startOffset="50%"
-            textAnchor="middle"
-            className="fill-gray-300 text-xs"
+      <EdgeLabelRenderer>
+        {getEdgeLabel() && (
+          <div
+            style={{
+              position: 'absolute',
+              transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
+              fontSize: 10,
+              pointerEvents: 'all',
+            }}
+            className="nodrag nopan bg-gray-800 text-white px-2 py-1 rounded border border-gray-600 text-xs font-medium"
           >
-            {data.label}
-          </textPath>
-        </text>
-      )}
+            {getEdgeLabel()}
+          </div>
+        )}
+      </EdgeLabelRenderer>
     </>
   );
 }
